@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Orinium_Browser;
+using System;
 using System.Windows.Forms;
 
 namespace Orinium_Browser
 {
-    internal static class Program
+    static class Program
     {
-        /// <summary>
-        /// アプリケーションのメイン エントリ ポイントです。
-        /// </summary>
-        [STAThread]
+        // アプリケーションのメインエントリーポイント
+        [STAThread] // シングルスレッドアパートメントスタイルを指定
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            Application.EnableVisualStyles(); // ビジュアルスタイルを有効化
+            Application.SetCompatibleTextRenderingDefault(false); // テキストレンダリングを設定
+
+            // Form1 を新しく作成して、アプリケーションを実行
             Application.Run(new Form1());
         }
     }
