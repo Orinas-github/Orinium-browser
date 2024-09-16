@@ -5,7 +5,8 @@ namespace Orinium_Browser
 {
     public partial class Form1 : Form
     {
-        private WebBrowser webBrowser; // WebBrowser コントロールを宣言
+        private bool isIE_mode = true; // モードを管理する変数
+        private OriniumBrowser_main webBrowser; // webBrowser コントロールを宣言
         private TextBox urlTextBox; // 入力用 TextBox を宣言
         private Button goButton; // 移動ボタンを宣言
 
@@ -18,11 +19,20 @@ namespace Orinium_Browser
         private void InitializeBrowser()
         {
             // WebBrowser コントロールの初期設定
-            webBrowser = new WebBrowser
+            webBrowser = new OriniumBrowser_main(isIE_mode)
             {
                 Dock = DockStyle.Fill // フォームにフィットするようにドッキング
             };
             this.Controls.Add(webBrowser); // フォームのコントロールに追加
+
+            // モード切り替えボタンの作成
+            Button toggleModeButton = new Button
+            {
+                Text = "Toggle Mode",
+                Dock = DockStyle.Top // ボタンを上部に配置
+            };
+            toggleModeButton.Click += toggleModeButton_Click; // クリックイベントハンドラの追加
+            this.Controls.Add(toggleModeButton); // フォームにボタンを追加
 
             // URL 入力用 TextBox の設定
             urlTextBox = new TextBox
@@ -62,12 +72,18 @@ namespace Orinium_Browser
             // 入力された URL に移動
             if (!string.IsNullOrWhiteSpace(urlTextBox.Text))
             {
-                webBrowser.Navigate(urlTextBox.Text); // WebBrowser に URL をナビゲート
+                webBrowser.Navigate(urlTextBox.Text, isIE_mode); // WebBrowser に URL をナビゲート
             }
             else
             {
                 MessageBox.Show("URL を入力してください！", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private void toggleModeButton_Click(object sender, EventArgs e)
+        {
+            isIE_mode = !isIE_mode; // モードを切り替え
+            webBrowser.SetMode(isIE_mode); // MyWebBrowser にモードを通知
         }
     }
 }
