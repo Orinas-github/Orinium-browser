@@ -29,6 +29,7 @@ namespace Orinium_Browser
             {
                 Dock = DockStyle.Top // 上部にドッキング
             };
+            urlTextBox.KeyDown += urlTextBox_KeyDown; // エンターキーのイベントを追加
             this.Controls.Add(urlTextBox); // フォームのコントロールに追加
 
             // 移動ボタンの設定
@@ -41,7 +42,22 @@ namespace Orinium_Browser
             this.Controls.Add(goButton); // フォームのコントロールに追加
         }
 
+        // エンターキーが押されたときの処理
+        private void urlTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter) // エンターキーかチェック
+            {
+                GoToUrl(); // URL 移動を呼び出し
+            }
+        }
+
         private void GoButton_Click(object sender, EventArgs e)
+        {
+            GoToUrl(); //ページ遷移
+        }
+
+
+        private void GoToUrl()
         {
             // 入力された URL に移動
             if (!string.IsNullOrWhiteSpace(urlTextBox.Text))
