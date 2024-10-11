@@ -1,12 +1,6 @@
 #include <iostream>
-#include <string>
-#include <filesystem>
-#include <cstdlib>
+#include <string> 
 
-int main() {
-    // ネットワークモジュールを使ってURLを取得
-    // 取得したHTMLをレンダリングエンジンに渡してパース
-    // JavaScriptエンジンで必要なスクリプトを実行
-    // 最後にUIフレームワークで描画
-    return 0;
+void FetchURL(const std::string& url) {
+    // URLからデータを取得する
 }
