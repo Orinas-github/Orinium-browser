@@ -13,7 +13,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* use
 std::string FetchURL(const std::string& url, const std::string& useragent) { 
     // useragent が自動の時の処理
     if (useragent == "@auto"){
-        FetchURL(url, "MyUserAgent/v0.1");
+        return FetchURL(url, "MyUserAgent/v0.1");
     } 
 
     if (false){
