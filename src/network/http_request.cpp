@@ -10,35 +10,44 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* use
     return totalSize;
 }
 
-std::string FetchURL(const std::string& url) {
-    // URLからデータを取得する
-    CURL *curl;
-    CURLcode res;
-    std::string response; // レスポンスデータを格納するためのstring
+std::string FetchURL(const std::string& url, const std::string& useragent) { 
+    // useragent が自動の時の処理
+    if (useragent == "@auto"){
+        FetchURL(url, "MyUserAgent/v0.1");
+    } 
 
-    curl = curl_easy_init();
-    if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "MyUserAgent/1.0");
-        
-        // コールバック関数を設定
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    if (false){
+        // ブラウザ固有のURL用 ※未定義
+    } else {
+        // URLからデータを取得する
+        CURL *curl;
+        CURLcode res;
+        std::string response; // レスポンスデータを格納するためのstring
 
-        // データの取得を実行
-        res = curl_easy_perform(curl);
+        curl = curl_easy_init();
+        if(curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url);
+            curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
         
-        // 実行結果をチェック
-        if(res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-        } else {
-            std::cout << "Response received:" << std::endl;
-            std::cout << response << std::endl; // レスポンスを表示
+            // コールバック関数を設定
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+            // データの取得を実行
+            res = curl_easy_perform(curl);
+
+            // 実行結果をチェック
+            if(res != CURLE_OK) {
+                std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+            } else {
+                std::cout << "Response received:" << std::endl;
+                std::cout << response << std::endl; // レスポンスを表示
+            }
+
+            // 後片付け
+            curl_easy_cleanup(curl);
+
+            return response;
         }
-
-        // 後片付け
-        curl_easy_cleanup(curl);
-
-        return response;
     }
 }
