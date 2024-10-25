@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 pub struct JSEngine {
     // JSエンジンの状態などを管理するためのフィールド
+    
 }
 
 impl JSEngine {
@@ -11,5 +14,7 @@ impl JSEngine {
     pub fn execute(&self, code: &str) {
         // ここでcodeを実行するロジックを書く
         println!("Executing JS: {}", code);
+
+        
     }
 }

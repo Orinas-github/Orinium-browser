@@ -1,4 +1,5 @@
-// ui/windows.rs
+use eframe::egui;
+
 pub struct GUI;
 
 impl GUI {
