@@ -44,21 +44,20 @@ impl HTMLRenderer {
         let mut html_tagattr = String::new();
 
         println!("done!");
-
         println!("Parse tags...");
-        while html_pc > html.chars().count(){
+        while html_pc < html.chars().count() {
             // タグの抽出
             if compare(html, html_pc,"<") {
-                if !compare(html, html_pc, "/") && !compare(html, html_pc, " ") && !compare(html, html_pc, "!") {
+                if !compare(html, html_pc + 1, "/") && !compare(html, html_pc + 1, " ") && !compare(html, html_pc + 1, "!") {
                     html_tagname = String::new();
                     html_pc += 1;
-                    while !compare(html, html_pc, " ") && !compare(html, html_pc, ">"){
+                    while !compare(html, html_pc, " ") && !compare(html, html_pc, ">") {
                         html_tagname = html_tagname + &get_nth_string(html, html_pc);
                         html_pc += 1;
                     }
                     html_tag_first.push(html_pc + 1);
-                    html_tags.push(html_tagname);
-                    if !compare(html, html_pc, " ") {
+                    html_tags.push(html_tagname.clone());
+                    if compare(html, html_pc, " ") {
                         html_tagattr = String::new();
                         html_pc += 1;
                         while !compare(html, html_pc, ">") {
@@ -68,16 +67,18 @@ impl HTMLRenderer {
                         html_tagattrs.push(html_tagattr);
                         *html_tag_first.last_mut().unwrap() = html_pc + 1;
                     } else {
-                        html_tagattr = String::new();
+                        html_tagattrs.push(String::new());
                     }
                 }
             }
             html_pc += 1;
         }
-        println!("30%");
 
+        println!("done!");
+        println!("{}", html_tags.join(", "));
         // 要素を見つける
         for i in 0..html_tags.len() {
+
             // 作業用フラグ
         }
 
