@@ -12,6 +12,11 @@ struct Tagdata {
     //  attr は attribute の略
 }
 
+enum Node {
+    Element { tag: String, children: Vec<Node> },
+    Text(String),
+}
+
 fn get_nth_string(s: &str, n: usize) -> String {
     s.chars().nth(n).unwrap_or_default().to_string() // n番目の文字をStringで取得
 }
@@ -25,7 +30,6 @@ impl HTMLRenderer {
     pub fn render(html: &str) {
         // HTMLをレンダリングするためのロジック
         println!("Rendering HTML: {}", html);
-        // 初期化
         // HTMLレンダリングに必要な初期化や設定
         println!("Setting up HTML renderer...");
 
