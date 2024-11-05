@@ -47,11 +47,50 @@ impl HTMLRenderer {
         let mut html_tagname = String::new();
         let mut html_tagattr = String::new();
 
+        let mut html_elements: Vec<String> = Vec::new();
+        let mut html_elements_bool: Vec<bool> = Vec::new(); 
+
         println!("done!");
         println!("Parse tags...");
         
-        // 作業用フラグ
+        while html_pc < html.chars().count() {
+            // タグの抽出,要素の取得
+            if compare(html, html_pc,"<") {
+                if !compare(html, html_pc + 1, "/") && !compare(html, html_pc + 1, " ") && !compare(html, html_pc + 1, "!") {
+                    html_elements_bool.push(Bool::new(true));
+                    html_elements.push(String::new());
 
+                    html_tagname = String::new();
+                    html_pc += 1;
+                    while !compare(html, html_pc, " ") && !compare(html, html_pc, ">") {
+                        html_tagname = html_tagname + &get_nth_string(html, html_pc);
+                        html_pc += 1;
+                    }
+                    html_tag_first.push(html_pc + 1);
+                    html_tags.push(html_tagname.clone());
+                    if compare(html, html_pc, " ") {
+                        html_tagattr = String::new();
+                        html_pc += 1;
+                        while !compare(html, html_pc, ">") {
+                            html_tagattr = html_tagattr + &get_nth_string(html, html_pc);                                        html_pc += 1;
+                        }
+                        html_tagattrs.push(html_tagattr);
+                        *html_tag_first.last_mut().unwrap() = html_pc + 1;
+                    } else {
+                        html_tagattrs.push(String::new());
+                    }
+                } else {
+                    // 作業用フラグ
+                }
+            } else {
+                for i in 0..html_elements_bool.len() {
+                    if html_elements_bool[i] {
+                        html_elements[i] = html_elements[i] + &get_nth_string(html, html_pc);
+                    }
+                }
+            }
+            html_pc += 1;
+        }
 
 
     }
