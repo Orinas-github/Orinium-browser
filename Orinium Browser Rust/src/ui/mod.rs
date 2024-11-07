@@ -3,7 +3,7 @@ use eframe::egui;
 pub struct GUI;
 
 impl GUI {
-    pub fn display(&self) {
+    pub fn display(&self, data: Vec<String>) {
         // GUIを表示するロジック
         println!("Displaying the GUI!");
     }

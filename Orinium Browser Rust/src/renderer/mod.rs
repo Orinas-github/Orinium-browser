@@ -34,6 +34,14 @@ struct Node {
     parent: String
 }
 
+/*
+enum GUI {
+    Element {
+
+    }
+}
+*/
+
 
 fn get_nth_string(s: &str, n: usize) -> String {
     s.chars().nth(n).unwrap_or_default().to_string() // n番目の文字をStringで取得
@@ -45,7 +53,12 @@ fn compare(code: &str, n: usize, txt: &str) -> bool {
 
 impl HTMLRenderer {
 
-    pub fn render(html: &str) {
+    pub fn render(html: &str) -> Vec<String> {
+        let (tags, attrs, elements, parsed) = Self::parser(html);
+        elements
+    }
+
+    pub fn parser(html: &str) -> (Vec<String>, Vec<String>, Vec<String>, Vec<Node>) {
         // HTMLをレンダリングするためのロジック
         println!("Rendering HTML: {}", html);
         // HTMLレンダリングに必要な初期化や設定
@@ -188,14 +201,16 @@ impl HTMLRenderer {
             }
             html_pc += 1;
         }
-        // /*
+        /*
         println!("{:?}", html_elements);
         println!("{:?}", html_elements_bool);
         println!("{:?}", html_tags);
         println!("{:?}", html_layers);
         println!("{:?}", html_tagattrs);
         println!("{:?}", parsed_html);
-        // */
+        */
         println!("Done!");
+
+        return (html_tags, html_tagattrs, html_elements, parsed_html);
     }
 }

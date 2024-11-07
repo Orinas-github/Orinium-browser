@@ -21,10 +21,7 @@ fn main() {
     // JSを実行
     js_engine.execute("console.log('Hello, World!');");
 
-    // HTMLを取得、レンダリング
+    // HTMLを取得、レンダリング、描画
     // html::render(net::fetch("https://example.com").as_str());
-    html::render(&htmlcode);
-
-    // 描画
-    gui.display();
+    gui.display(html::render(&htmlcode));
 }
