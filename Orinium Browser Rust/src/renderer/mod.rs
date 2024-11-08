@@ -31,7 +31,8 @@ struct Node {
     id: usize,
     element: String,
     layer: usize,
-    parent: String
+    parent: String,
+    istext: bool
 }
 
 /*
@@ -166,8 +167,8 @@ impl HTMLRenderer {
                                             id: i,
                                             element: html_elements[i].clone(),
                                             layer: html_layers[i],
-                                            parent: html_parent.last().unwrap_or(&String::new()).clone()
-   
+                                            parent: html_parent.last().unwrap_or(&String::new()).clone(),
+                                            istext: vec!["b","i","u","s","sub","sup","em","strong","dfn","address","blockquote","q","code","center","pre","h1","h2","h3","h4","h5","h6","button","a"].iter().map(|s| s.to_string()).collect::<Vec<_>>().contains(&html_tags[i])
                                         }
                                     );
                                     break;

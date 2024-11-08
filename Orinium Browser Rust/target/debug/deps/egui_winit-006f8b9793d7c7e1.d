@@ -1,0 +1,10 @@
+C:\Users\chela\OneDrive\ドキュメント\Github\Orinium Browser\Orinium Browser\Orinium Browser Rust\target\debug\deps\libegui_winit-006f8b9793d7c7e1.rmeta: C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\lib.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\clipboard.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\screen_reader.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\window_settings.rs
+
+C:\Users\chela\OneDrive\ドキュメント\Github\Orinium Browser\Orinium Browser\Orinium Browser Rust\target\debug\deps\libegui_winit-006f8b9793d7c7e1.rlib: C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\lib.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\clipboard.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\screen_reader.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\window_settings.rs
+
+C:\Users\chela\OneDrive\ドキュメント\Github\Orinium Browser\Orinium Browser\Orinium Browser Rust\target\debug\deps\egui_winit-006f8b9793d7c7e1.d: C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\lib.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\clipboard.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\screen_reader.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\window_settings.rs
+
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\lib.rs:
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\clipboard.rs:
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\screen_reader.rs:
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\egui-winit-0.19.0\src\window_settings.rs:

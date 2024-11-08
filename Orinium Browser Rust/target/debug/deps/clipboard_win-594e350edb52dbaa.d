@@ -1,0 +1,10 @@
+C:\Users\chela\OneDrive\ドキュメント\Github\Orinium Browser\Orinium Browser\Orinium Browser Rust\target\debug\deps\libclipboard_win-594e350edb52dbaa.rmeta: C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\lib.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\formats.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\raw.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\utils.rs
+
+C:\Users\chela\OneDrive\ドキュメント\Github\Orinium Browser\Orinium Browser\Orinium Browser Rust\target\debug\deps\libclipboard_win-594e350edb52dbaa.rlib: C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\lib.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\formats.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\raw.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\utils.rs
+
+C:\Users\chela\OneDrive\ドキュメント\Github\Orinium Browser\Orinium Browser\Orinium Browser Rust\target\debug\deps\clipboard_win-594e350edb52dbaa.d: C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\lib.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\formats.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\raw.rs C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\utils.rs
+
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\lib.rs:
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\formats.rs:
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\raw.rs:
+C:\Users\chela\.cargo\registry\src\index.crates.io-6f17d22bba15001f\clipboard-win-4.5.0\src\utils.rs:
