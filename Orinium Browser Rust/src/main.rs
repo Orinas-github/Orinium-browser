@@ -3,7 +3,6 @@ use network::Fetch as net;
 use renderer::HTMLRenderer as html;
 use ui::GUI as uisystem;
 
-use eframe::{egui::*};
 
 mod javascript;
 mod network;
@@ -27,6 +26,8 @@ fn main() {
     // html::render(net::fetch("https://example.com").as_str());
     gui.display(html::render(&htmlcode));
 
-    let options = eframe::NativeOptions::default();
-    eframe::run_native("Orinium", options, Box::new(|cc| Box::new(ui::Orinium::new(cc))));
+    // グラフィックの初期化とウィンドウ作成をする
+
+    App::new().run();
+
 }

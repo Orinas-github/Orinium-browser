@@ -1,22 +1,24 @@
-use eframe::{egui::*};
+use bevy::prelude::*;
 
 pub struct GUI;
-
-#[derive(Default)]
-pub struct Orinium {}
-
-impl Orinium {
-    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {Self::default()}
-}
-
-impl eframe::App for Orinium {
-    fn save(&mut self, _storage: &mut dyn eframe::Storage) {}       
-    fn update(&mut self, _ctx: &Context, _frame: &mut eframe::Frame) {}
-}
 
 impl GUI {
     pub fn display(&self, data: Vec<String>) {
         // GUIを表示するロジック
         println!("Displaying the GUI!");
+    }
+
+    fn draw(node: &Node, target: &glium::Frame) {
+        if node.istext {
+            // テキストを描画するロジックを入れる
+        } else {
+            // タグに応じた描画を行う
+            // 簡易的な四角形を描画したり、テキストを描画するロジックを入れる
+        }
+    
+        // 子ノードも描画
+        for child in &node.children {
+            draw(child, target);
+        }
     }
 }
