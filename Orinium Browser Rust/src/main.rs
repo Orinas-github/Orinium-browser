@@ -1,27 +1,32 @@
+use winit::application::ApplicationHandler;
+use winit::event::WindowEvent;
+use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use winit::window::{Window, WindowId};
+
 use javascript::JSEngine;
 use network::Fetch as net;
 use renderer::HTMLRenderer as html;
 use ui::GUI as uisystem;
-
 
 mod javascript;
 mod network;
 mod renderer;
 mod ui;
 
-use bevy::prelude::*;
+#[derive(Default)]
+struct App {
+    window: Option<Window>,
+}
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Update, (test))
-        .run();
+    let event_loop = EventLoop::new().unwrap();
+    let window = WindowBuilder::new().build(&event_loop).unwrap();
 }
 
 fn test() {
-    // 各モジュールを初期化
     let js_engine = JSEngine::new();
     let gui = uisystem;
+    // モジュールを初期化
     let htmlcode = r#"<!DOCTYPE html>
 <html lang="ja">
     <h1>hello</h1>

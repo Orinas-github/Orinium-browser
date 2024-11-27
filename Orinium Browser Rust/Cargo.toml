@@ -4,7 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.15.0-rc.3" # make sure this is the latest version
+rand = "0.8.5"
+softbuffer = "0.4.1"
+tiny-skia = "0.11.4"
+winit = "0.29.15"
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

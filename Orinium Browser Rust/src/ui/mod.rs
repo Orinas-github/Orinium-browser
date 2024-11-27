@@ -1,5 +1,3 @@
-use bevy::prelude::*;
-
 pub struct GUI;
 
 impl GUI {
