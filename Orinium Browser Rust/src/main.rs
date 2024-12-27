@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-=======
-use winit::application::ApplicationHandler;
-use winit::event::WindowEvent;
-use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
-use winit::window::{Window, WindowId};
->>>>>>> 850d6e8411f9468b46e8ca9812a62a4531b30889
 
 use javascript::JSEngine;
 use network::Fetch as net;
@@ -16,21 +9,10 @@ mod network;
 mod renderer;
 mod ui;
 
-<<<<<<< HEAD
 
 
 fn main() {
 
-=======
-#[derive(Default)]
-struct App {
-    window: Option<Window>,
-}
-
-fn main() {
-    let event_loop = EventLoop::new().unwrap();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
->>>>>>> 850d6e8411f9468b46e8ca9812a62a4531b30889
 }
 
 fn test() {
