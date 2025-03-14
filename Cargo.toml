@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-
+iced = { version = "0.13.1", features = ["image"] }
 
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]

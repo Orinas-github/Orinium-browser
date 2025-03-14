@@ -61,9 +61,9 @@ impl HTMLRenderer {
 
     pub fn parser(html: &str) -> (Vec<String>, Vec<String>, Vec<String>, Vec<Node>) {
         // HTMLをレンダリングするためのロジック
-        println!("Rendering HTML: {}", html);
+        // println!("Rendering HTML: {}", html);
         // HTMLレンダリングに必要な初期化や設定
-        println!("Setting up HTML renderer...");
+        // println!("Setting up HTML renderer...");
 
         // let mut html_data = HashMap::new;
         // let mut html_guidata = HashMap::new;
@@ -90,7 +90,6 @@ impl HTMLRenderer {
 
         let mut parsed_html: Vec<Node> = Vec::new();
 
-        println!("done!");
         println!("Parsing html...");
         
         while html_pc < html.chars().count() {
@@ -210,7 +209,7 @@ impl HTMLRenderer {
         println!("{:?}", html_tagattrs);
         println!("{:?}", parsed_html);
         */
-        println!("Done!");
+        // println!("Done!");
 
         return (html_tags, html_tagattrs, html_elements, parsed_html);
     }
