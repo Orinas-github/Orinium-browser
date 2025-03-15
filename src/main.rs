@@ -1,6 +1,6 @@
 
 use javascript::JSEngine;
-use network::Fetch as net;
+use network::Net as net;
 use renderer::HTMLRenderer as html;
 // use ui::GUI as uisystem;
 
@@ -33,7 +33,6 @@ fn update(counter: &mut Counter, message: Message) {
         Message::Increment => counter.value += 1,
         Message::Display => {
             counter.maintxt = test().join("\n");
-            println!("{}",test()[3]);
         }
     }
 }

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use crate::javascript::JSEngine;
-use crate::network::Fetch;
+// use crate::network::Net;
 
 pub struct HTMLRenderer;
 
@@ -59,7 +59,7 @@ impl HTMLRenderer {
         elements
     }
 
-    pub fn parser(html: &str) -> (Vec<String>, Vec<String>, Vec<String>, Vec<Node>) {
+    fn parser(html: &str) -> (Vec<String>, Vec<String>, Vec<String>, Vec<Node>) {
         // HTMLをレンダリングするためのロジック
         // println!("Rendering HTML: {}", html);
         // HTMLレンダリングに必要な初期化や設定
@@ -82,8 +82,8 @@ impl HTMLRenderer {
         // let mut tag_num = 0;
 
         let mut html_pc: usize = 0;
-        let mut html_tagname = String::new();
-        let mut html_tagattr = String::new();
+        let mut html_tagname;
+        let mut html_tagattr;
 
         let mut html_elements: Vec<String> = Vec::new();
         let mut html_elements_bool: Vec<bool> = Vec::new(); 
