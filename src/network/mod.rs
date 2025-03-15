@@ -1,6 +1,8 @@
 use reqwest::{Client, header::{USER_AGENT, CONTENT_TYPE}};
 use serde_json::Value;
 use std::error::Error;
+use std::fs;
+use std::path::Path;
 
 pub struct Net {
     client: Client,
@@ -53,5 +55,23 @@ impl Net {
 
         let body = response.text().await?;
         Ok(body)
+    }
+
+    // 5. 相対ファイル取得
+    pub fn file_get_relative_path(&self, relative_path: &str) -> Result<String, Box<dyn Error>> {
+        // 相対パスでファイルを開く
+        let file_path = Path::new(relative_path);
+
+        // ファイルが存在するか確認
+        if !file_path.exists() {
+            println!("ファイルが見つかりません: {:?}", file_path);
+            return Ok("".to_string());
+        }
+    
+        // ファイルの内容を読み込む
+        let contents = fs::read_to_string(file_path)?;
+        println!("ファイルの内容:\n{}", contents);
+    
+        Ok(contents)
     }
 }

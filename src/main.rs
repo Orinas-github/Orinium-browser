@@ -1,6 +1,7 @@
+use std::error::Error;
 
 use javascript::JSEngine;
-use network::Net as net;
+use network::Net;
 use renderer::HTMLRenderer as html;
 // use ui::GUI as uisystem;
 
@@ -29,10 +30,11 @@ pub fn main() -> iced::Result {
 }
 
 fn update(counter: &mut Counter, message: Message) {
+    let net = Net::new();
     match message {
         Message::Increment => counter.value += 1,
         Message::Display => {
-            counter.maintxt = test().join("\n");
+            counter.maintxt = result_to_string(net.file_get_relative_path("pages/test/testpage.html"));
         }
     }
 }
@@ -55,6 +57,13 @@ fn view(counter: &Counter) -> Element<Message> {
     .center_x(Fill)
     .center_y(Fill)
     .into()
+}
+
+fn result_to_string(result: Result<String, Box<dyn Error>>) -> String {
+    match result {
+        Ok(string) => string,
+        Err(error) => "".to_string()
+    }
 }
 
 fn test() -> Vec<String> {
