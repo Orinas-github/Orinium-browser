@@ -10,18 +10,17 @@ mod network;
 mod renderer;
 mod ui;
 
-use iced::widget::{column, row, text, button, scrollable};
+use iced::widget::{column, row, text, button, scrollable, vertical_space};
 use iced::Element;
 
 #[derive(Debug, Clone)]
 enum Message {
     Increment,
     Display,
-    // Scrolled, // スクロールイベント
 }
 
 #[derive(Default)]
-struct Counter { 
+struct Testpage { 
     value: u64,
     maintxt: String,
 }
@@ -30,26 +29,22 @@ pub fn main() -> iced::Result {
     iced::run("Test page", update, view)
 }
 
-fn update(counter: &mut Counter, message: Message) {
+fn update(testpage: &mut Testpage, message: Message) {
     let net = Net::new();
     match message {
-        Message::Increment => counter.value += 1,
+        Message::Increment => testpage.value += 1,
         Message::Display => {
-            counter.maintxt = result_to_string(net.file_get_relative_path("pages/test/testpage.html"));
+            testpage.maintxt = result_to_string(net.file_get_relative_path("pages/test/testpage.html"));
         }
     }
 }
 
-fn view(counter: &Counter) -> Element<Message> {
+fn view(testpage: &Testpage) -> Element<Message> {
     scrollable(
         column![
-            "Top",
-            row!["Left", "Right"].spacing(10),
-            "Bottom",
-            text(counter.value).size(20),
-            button("Increment").on_press(Message::Increment),
-            text(counter.maintxt.clone()).size(20),
-            button("reload").on_press(Message::Display)
+            row!["  ",text(testpage.maintxt.clone()).size(20),].spacing(10),
+            button("reload").on_press(Message::Display),
+            vertical_space().height(30),
         ]
         .spacing(10)
 
