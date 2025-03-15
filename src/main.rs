@@ -10,17 +10,18 @@ mod network;
 mod renderer;
 mod ui;
 
-use iced::widget::{column, container, row, text, button};
-use iced::{Fill, Element};
+use iced::widget::{column, row, text, button, scrollable};
+use iced::Element;
 
 #[derive(Debug, Clone)]
 enum Message {
     Increment,
     Display,
+    // Scrolled, // スクロールイベント
 }
 
 #[derive(Default)]
-struct Counter {
+struct Counter { 
     value: u64,
     maintxt: String,
 }
@@ -40,7 +41,7 @@ fn update(counter: &mut Counter, message: Message) {
 }
 
 fn view(counter: &Counter) -> Element<Message> {
-    container(
+    scrollable(
         column![
             "Top",
             row!["Left", "Right"].spacing(10),
@@ -53,9 +54,6 @@ fn view(counter: &Counter) -> Element<Message> {
         .spacing(10)
 
     )
-    .padding(10)
-    .center_x(Fill)
-    .center_y(Fill)
     .into()
 }
 
