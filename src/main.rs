@@ -10,7 +10,7 @@ mod network;
 mod renderer;
 mod ui;
 
-use glium::{glutin, Surface};
+use glium::{winit, Surface};
 use iced::{Application, Element, Theme, Size};
 use iced::widget::{column, row, text, button, scrollable, vertical_space};
 
@@ -23,6 +23,29 @@ enum Message {
 struct Testpage { 
     maintxt: String,
 }
+
+/*
+fn main() {
+    // Glutinの初期化
+    let event_loop = winit::event_loop::EventLoopBuilder::new().build().unwrap();
+    let (window, display) = glium::backend::glutin::SimpleWindowBuilder::new().build(&event_loop);
+
+    // Iced の初期化
+    let mut iced_application = Application::new(());
+    let mut iced_renderer =  iced::Renderer::with_theme(Theme::Light, &display, Size::new(800.0, 600.0));
+
+    // イベントループ
+    let _ = event_loop.run(move |event, window_target| {
+        match event {
+            glium::winit::event::Event::WindowEvent { event, .. } => match event {
+            glium::winit::event::WindowEvent::CloseRequested => window_target.exit(),
+            _ => (),
+            },
+            _ => (),
+        };
+    });
+}
+*/
 
 pub fn main() -> iced::Result {
     iced::run("Test page", update, view)
