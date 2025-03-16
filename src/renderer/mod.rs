@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use crate::javascript::JSEngine;
-// use crate::network::Net;
 
 pub struct HTMLRenderer;
 
@@ -14,17 +13,6 @@ struct Tagdata {
 }
 */
 
-/*
-enum Node_test {
-    Element {
-        tag: String,
-        attr: Vec<(String, String)>, // 属性名と属性値
-        children: Vec<Node_test>,
-    },
-    Text(String)
-}
-*/
-
 #[derive(Debug)]
 struct Node {
     tag: String,
@@ -32,7 +20,9 @@ struct Node {
     element: String,
     layer: usize,
     parent: String,
-    istext: bool
+    children: Vec<String>,
+    istext: bool,
+    isdisplay: bool,
 }
 
 /*
@@ -56,7 +46,21 @@ impl HTMLRenderer {
 
     pub fn render(html: &str) -> Vec<String> {
         let (tags, attrs, elements, parsed) = Self::parser(html);
-        elements
+        let mut text: Vec<String> = Vec::new();
+        /*
+        for i in 0..parsed.len() {
+            let mut tag_name = parsed[i].tag;
+            if tag_name == "nojavascript" {
+                break;
+            }
+        }
+        */
+        for i in 0..parsed.len() {
+            if parsed[i].istext {
+                text.push(parsed[i].element.clone());
+            }
+        }
+        text
     }
 
     fn parser(html: &str) -> (Vec<String>, Vec<String>, Vec<String>, Vec<Node>) {
@@ -78,6 +82,7 @@ impl HTMLRenderer {
         let mut html_layer: usize = 0;
         // let mut html_layer_counter: Vec<Vec> = Vec::new();
         let mut html_parent: Vec<String> = Vec::new();
+        let mut html_parent_i: usize = 0;
 
         // let mut tag_num = 0;
 
@@ -89,8 +94,6 @@ impl HTMLRenderer {
         let mut html_elements_bool: Vec<bool> = Vec::new(); 
 
         let mut parsed_html: Vec<Node> = Vec::new();
-
-        println!("Parsing html...");
         
         while html_pc < html.chars().count() {
             // タグの抽出,要素の取得
@@ -115,6 +118,7 @@ impl HTMLRenderer {
                         html_tag_last.push(html_pc + 1);
                         html_tags.push(html_tagname.clone());
                         html_parent.push(html_tagname.clone());
+                        html_parent_i = parsed_html.len() as usize;
 
                         if compare(html, html_pc, " ") {
                             html_tagattr = String::new();
@@ -167,9 +171,16 @@ impl HTMLRenderer {
                                             element: html_elements[i].clone(),
                                             layer: html_layers[i],
                                             parent: html_parent.last().unwrap_or(&String::new()).clone(),
-                                            istext: vec!["b","i","u","s","sub","sup","em","strong","dfn","address","blockquote","q","code","center","pre","h1","h2","h3","h4","h5","h6","button","a"].iter().map(|s| s.to_string()).collect::<Vec<_>>().contains(&html_tags[i])
+                                            children: Vec::<String>::new(),
+                                            istext: vec!["b","i","u","s","sub","sup","em","strong","dfn","address","blockquote","q","code","center","pre","h1","h2","h3","h4","h5","h6","button","a"]
+                                                .iter()
+                                                .map(|s| s.to_string())
+                                                .collect::<Vec<_>>()
+                                                .contains(&html_tags[i]),
+                                            isdisplay: true,
                                         }
                                     );
+                                    parsed_html[html_parent_i].children.push(html_tags[i].clone()); // Children 追加
                                     break;
                                 }
                             }

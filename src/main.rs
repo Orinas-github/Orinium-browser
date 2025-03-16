@@ -34,7 +34,7 @@ fn update(testpage: &mut Testpage, message: Message) {
     match message {
         Message::Increment => testpage.value += 1,
         Message::Display => {
-            testpage.maintxt = result_to_string(net.file_get_relative_path("pages/test/testpage.html"));
+            testpage.maintxt = html::render(&result_to_string(net.file_get_relative_path("pages/test/testpage.html"))).join("\n");
         }
     }
 }
@@ -59,6 +59,7 @@ fn result_to_string(result: Result<String, Box<dyn Error>>) -> String {
     }
 }
 
+/*
 fn test() -> Vec<String> {
     let js_engine = JSEngine::new();
     // let gui = uisystem;
@@ -77,3 +78,4 @@ fn test() -> Vec<String> {
     // /*gui.display(*/html::render(&htmlcode)/*)*/;
     return html::render(&htmlcode);
 }
+*/
