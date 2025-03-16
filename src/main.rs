@@ -10,8 +10,9 @@ mod network;
 mod renderer;
 mod ui;
 
+use glium::{glutin, Surface};
+use iced::{Application, Element, Theme, Size};
 use iced::widget::{column, row, text, button, scrollable, vertical_space};
-use iced::Element;
 
 #[derive(Debug, Clone)]
 enum Message {
@@ -20,7 +21,6 @@ enum Message {
 
 #[derive(Default)]
 struct Testpage { 
-    value: u64,
     maintxt: String,
 }
 
