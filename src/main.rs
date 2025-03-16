@@ -59,6 +59,7 @@ fn result_to_string(result: Result<String, Box<dyn Error>>) -> String {
     }
 }
 
+/*
 fn test() -> Vec<String> {
     let js_engine = JSEngine::new();
     // let gui = uisystem;
@@ -77,3 +78,4 @@ fn test() -> Vec<String> {
     // /*gui.display(*/html::render(&htmlcode)/*)*/;
     return html::render(&htmlcode);
 }
+*/
