@@ -15,7 +15,6 @@ use iced::Element;
 
 #[derive(Debug, Clone)]
 enum Message {
-    Increment,
     Display,
 }
 
@@ -32,7 +31,6 @@ pub fn main() -> iced::Result {
 fn update(testpage: &mut Testpage, message: Message) {
     let net = Net::new();
     match message {
-        Message::Increment => testpage.value += 1,
         Message::Display => {
             testpage.maintxt = html::render(&result_to_string(net.file_get_relative_path("pages/test/testpage.html"))).join("\n");
         }
