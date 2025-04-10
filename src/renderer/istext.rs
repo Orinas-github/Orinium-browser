@@ -1,5 +1,4 @@
 pub fn is_text(html_tags: &[String], id: usize) -> bool {
-
     // 多分絶対今後増えると思うから別ファイルにしとかないとつらいことになる
     let istext = &[
         "b",

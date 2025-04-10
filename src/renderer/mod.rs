@@ -163,7 +163,7 @@ impl HTMLRenderer {
 
                         for id in (0..html_elements_bool.len()).rev() {
                             if html_elements_bool[id] == true {
-                                if html_tagname == html_tags[id] {    
+                                if html_tagname == html_tags[id] {
                                     html_tag_last[id] = html_pc;
                                     html_elements_bool[id] = false;
 
@@ -172,7 +172,7 @@ impl HTMLRenderer {
                                     let parent: String =
                                         html_parent.last().unwrap_or(&String::new()).clone();
 
-                                    let node = Node{
+                                    let node = Node {
                                         tag: html_tags[id].clone(),
                                         id,
                                         element: html_elements[id].clone(),

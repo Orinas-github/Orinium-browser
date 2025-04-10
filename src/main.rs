@@ -1,6 +1,5 @@
 use std::error::Error;
 
-
 use network::Net;
 use renderer::HTMLRenderer as html;
 // use ui::GUI as uisystem;

@@ -12,7 +12,6 @@ pub struct Net {
     client: Client,
 }
 
-
 // 今後使いそうだからunused allowしとく
 #[allow(unused)]
 impl Net {
