@@ -13,6 +13,12 @@ struct Tagdata {
 */
 
 #[derive(Debug)]
+// 使ってないもの:
+// tag
+// element
+// layer
+// parent
+// isdisplay
 #[allow(unused)]
 struct Node {
     tag: String,
