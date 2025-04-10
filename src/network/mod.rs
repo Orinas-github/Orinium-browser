@@ -1,13 +1,20 @@
-use reqwest::{Client, header::{USER_AGENT, CONTENT_TYPE}};
+use reqwest::{
+    header::{CONTENT_TYPE, USER_AGENT},
+    Client,
+};
 use serde_json::Value;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
 
+#[allow(unused)]
 pub struct Net {
     client: Client,
 }
 
+
+// 今後使いそうだからunused allowしとく
+#[allow(unused)]
 impl Net {
     pub fn new() -> Self {
         Net {
@@ -23,8 +30,13 @@ impl Net {
     }
 
     // 2. ヘッダー付き GET リクエスト
-    pub async fn get_with_headers(&self, url: &str, user_agent: &str) -> Result<String, reqwest::Error> {
-        let response = self.client
+    pub async fn get_with_headers(
+        &self,
+        url: &str,
+        user_agent: &str,
+    ) -> Result<String, reqwest::Error> {
+        let response = self
+            .client
             .get(url)
             .header(USER_AGENT, user_agent)
             .send()
@@ -35,7 +47,8 @@ impl Net {
 
     // 3. POST リクエスト (JSON ボディ)
     pub async fn post_json(&self, url: &str, json_data: &Value) -> Result<String, reqwest::Error> {
-        let response = self.client
+        let response = self
+            .client
             .post(url)
             .header(CONTENT_TYPE, "application/json")
             .json(json_data)
@@ -65,10 +78,10 @@ impl Net {
         if !file_path.exists() {
             return Ok("".to_string()); // 存在しない
         }
-    
+
         // ファイルの内容を読み込む
         let contents = fs::read_to_string(file_path)?;
-    
+
         Ok(contents)
     }
 }
