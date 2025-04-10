@@ -94,7 +94,6 @@ impl HTMLRenderer {
     /// - `(Vec<String>, Vec<String>, Vec<String>, Vec<Node>)`:
     ///   タグ、属性、要素、および解析されたノード情報を含むタプル。
     fn parser(html: &str) -> (Vec<String>, Vec<String>, Vec<String>, Vec<Node>) {
-        
         // HTMLをレンダリングするためのロジック
         // println!("Rendering HTML: {}", html);
         // HTMLレンダリングに必要な初期化や設定
