@@ -1,6 +1,5 @@
 use std::error::Error;
 
-use javascript::JSEngine;
 use network::Net;
 use renderer::HTMLRenderer as html;
 // use ui::GUI as uisystem;
@@ -10,9 +9,8 @@ mod network;
 mod renderer;
 mod ui;
 
-use glium::{winit, Surface};
-use iced::{Application, Element, Theme, Size};
-use iced::widget::{column, row, text, button, scrollable, vertical_space};
+use iced::widget::{button, column, row, scrollable, text, vertical_space};
+use iced::Element;
 
 #[derive(Debug, Clone)]
 enum Message {
@@ -20,7 +18,7 @@ enum Message {
 }
 
 #[derive(Default)]
-struct Testpage { 
+struct Testpage {
     maintxt: String,
 }
 
@@ -55,7 +53,10 @@ fn update(testpage: &mut Testpage, message: Message) {
     let net = Net::new();
     match message {
         Message::Display => {
-            testpage.maintxt = html::render(&result_to_string(net.file_get_relative_path("pages/test/testpage.html"))).join("\n");
+            testpage.maintxt = html::render(&result_to_string(
+                net.file_get_relative_path("pages/test/testpage.html"),
+            ))
+            .join("\n");
         }
     }
 }
@@ -63,12 +64,11 @@ fn update(testpage: &mut Testpage, message: Message) {
 fn view(testpage: &Testpage) -> Element<Message> {
     scrollable(
         column![
-            row!["  ",text(testpage.maintxt.clone()).size(20),].spacing(10),
+            row!["  ", text(testpage.maintxt.clone()).size(20),].spacing(10),
             button("reload").on_press(Message::Display),
             vertical_space().height(30),
         ]
-        .spacing(10)
-
+        .spacing(10),
     )
     .into()
 }
@@ -76,7 +76,7 @@ fn view(testpage: &Testpage) -> Element<Message> {
 fn result_to_string(result: Result<String, Box<dyn Error>>) -> String {
     match result {
         Ok(string) => string,
-        Err(error) => "".to_string()
+        Err(_) => "".to_string(),
     }
 }
 
