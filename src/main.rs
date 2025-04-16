@@ -16,7 +16,7 @@ use iced::Element;
 enum Message {
     Display,
 }
-@
+
 #[derive(Default)]
 struct Testpage {
     maintxt: String,
