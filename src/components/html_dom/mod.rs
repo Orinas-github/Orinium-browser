@@ -38,11 +38,11 @@ pub struct HTMLRenderer;
 #[derive(Debug)]
 #[allow(unused)]
 struct Node {
-    /// ノードのタグ名 (例: "div", "span")。
+    /// ノードのタグ名。
     tag: String,
     /// ノードの一意の識別子。
     id: usize,
-    /// ノードの内容または要素 (例: テキストや属性値)。
+    /// ノードの要素。
     element: String,
     /// ノードの階層レベル (ルートが 0)。
     layer: usize,

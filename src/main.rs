@@ -1,77 +1,21 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::error::Error;
 
-use network::Net;
-use renderer::HTMLRenderer as html;
-// use ui::GUI as uisystem;
+use components::html_dom::HTMLRenderer as html;
+use components::network::Net;
+use components::javascript::JSEngine;
 
-mod javascript;
-mod network;
-mod renderer;
-mod ui;
+mod components;
 
-use iced::widget::{button, column, row, scrollable, text, vertical_space};
-use iced::Element;
+pub fn main() {
 
-#[derive(Debug, Clone)]
-enum Message {
-    Display,
 }
 
-#[derive(Default)]
-struct Testpage {
-    maintxt: String,
-}
-
-/*
-fn main() {
-    // Glutinの初期化
-    let event_loop = winit::event_loop::EventLoopBuilder::new().build().unwrap();
-    let (window, display) = glium::backend::glutin::SimpleWindowBuilder::new().build(&event_loop);
-
-    // Iced の初期化
-    let mut iced_application = Application::new(());
-    let mut iced_renderer =  iced::Renderer::with_theme(Theme::Light, &display, Size::new(800.0, 600.0));
-
-    // イベントループ
-    let _ = event_loop.run(move |event, window_target| {
-        match event {
-            glium::winit::event::Event::WindowEvent { event, .. } => match event {
-            glium::winit::event::WindowEvent::CloseRequested => window_target.exit(),
-            _ => (),
-            },
-            _ => (),
-        };
-    });
-}
-*/
-
-pub fn main() -> iced::Result {
-    iced::run("Test page", update, view)
-}
-
-fn update(testpage: &mut Testpage, message: Message) {
-    let net = Net::new();
-    match message {
-        Message::Display => {
-            testpage.maintxt = html::render(&result_to_string(
-                net.file_get_relative_path("pages/test/testpage.html"),
-            ))
-            .join("\n");
-        }
-    }
-}
-
-fn view(testpage: &Testpage) -> Element<Message> {
-    scrollable(
-        column![
-            row!["  ", text(testpage.maintxt.clone()).size(20),].spacing(10),
-            button("reload").on_press(Message::Display),
-            vertical_space().height(30),
-        ]
-        .spacing(10),
-    )
-    .into()
-}
+// html::render(&result_to_string(
+//                net.file_get_relative_path("pages/test/testpage.html"),
+//            ))
+//            .join("\n");
 
 fn result_to_string(result: Result<String, Box<dyn Error>>) -> String {
     match result {
