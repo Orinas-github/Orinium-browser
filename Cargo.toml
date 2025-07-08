@@ -3,17 +3,6 @@ name = "Orinium_Browser"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-eframe = "0.31.1"
-reqwest = { version = "0.11", features = ["blocking", "json"] } # blocking を外すと非同期版、json はオプション
-tokio = { version = "1", features = ["full"] } # async/await
-serde_json = "1.0.140"
-serde = { version = "1.0.219", features = ["derive"] }
-
-# Enable a small amount of optimization in the dev profile.
-[profile.dev]
-opt-level = 1
-
-# Enable a large amount of optimization in the dev profile for dependencies.
-[profile.dev.package."*"]
-opt-level = 3
+[workspace]
+browser-gui = {path = "browser-gui" }
+resolver = "2"
