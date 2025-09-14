@@ -45,6 +45,13 @@ pub enum TokenizerState {
     CommentEndDash,
     BogusComment,
     Doctype,
+    DoctypeName,
+    BeforeDoctypePublicId,
+    DoctypePublicIdWithSingleQuote,
+    DoctypePublicIdWithDoubleQuote,
+    AfterDoctypePublicId,
+    DoctypeSystemId,
+    BogusDoctype,
 }
 
 #[allow(dead_code)]
@@ -58,7 +65,23 @@ pub struct Tokenizer<'a> {
     buffer: String,
 }
 
-#[allow(dead_code)]
+impl TokenizerState {
+    fn is_doctype(&self) -> bool {
+        matches!(
+            self,
+            TokenizerState::Doctype
+                | TokenizerState::DoctypeName
+                | TokenizerState::BeforeDoctypePublicId
+                | TokenizerState::DoctypePublicIdWithSingleQuote
+                | TokenizerState::DoctypePublicIdWithDoubleQuote
+                | TokenizerState::AfterDoctypePublicId
+                | TokenizerState::DoctypeSystemId
+                | TokenizerState::BogusDoctype
+        )
+    }
+}
+
+
 impl<'a> Tokenizer<'a> {
     pub fn new(input: &'a str) -> Self {
         Tokenizer {
@@ -77,10 +100,13 @@ impl<'a> Tokenizer<'a> {
             let c = self.input[self.pos..].chars().next().unwrap();
             self.pos += c.len_utf8();
 
+            // print!("State: {:?}, Char: '{}'\n", self.state, c);
+
             match self.state {
                 TokenizerState::Data => self.state_data(c),
                 TokenizerState::TagOpen => self.state_tag_open(c),
                 TokenizerState::TagName => self.state_tag_name(c),
+                _ if self.state.is_doctype() => self.state_doctype(c),
                 //TokenizerState::BeforeAttributeName => self.state_before_attribute_name(c),
                 //TokenizerState::AttributeName => self.state_attribute_name(c),
                 //TokenizerState::BeforeAttributeValue => self.state_before_attribute_value(c),
@@ -90,7 +116,7 @@ impl<'a> Tokenizer<'a> {
                 //TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
                 //TokenizerState::EndTagOpen => self.state_end_tag_open(c),
                 //TokenizerState::Comment | TokenizerState::CommentStartDash | TokenizerState::CommentEndDash => self.state_comment(c),
-                //TokenizerState::Doctype => self.state_doctype(c),
+
                 //TokenizerState::BogusComment => self.state_bogus_comment(c),
                 _ => {
                     // 未実装の状態は無視してData状態に戻る
@@ -134,8 +160,14 @@ impl<'a> Tokenizer<'a> {
                 if c == '-' {
                     self.state = TokenizerState::CommentStartDash;
                 } else if self.input[self.pos..].to_lowercase().starts_with("doctype") {
-                    self.pos += 6;
+                    self.pos += 7;
                     self.state = TokenizerState::Doctype;
+                    self.current_token = Some(Token::Doctype {
+                        name: None,
+                        public_id: None,
+                        system_id: None,
+                        force_quirks: false,
+                    });
                 } else {
                     self.state = TokenizerState::BogusComment;
                 }
@@ -184,6 +216,88 @@ impl<'a> Tokenizer<'a> {
                 // タグの終了として処理
                 self.commit_token();
                 self.state = TokenizerState::Data;
+            }
+        }
+    }
+
+    fn state_doctype(&mut self, c: char) {
+        match c {
+            c if c.is_whitespace() => {
+                match self.state {
+                    TokenizerState::Doctype => self.state = TokenizerState::DoctypeName,
+                    TokenizerState::DoctypeName => {
+                        if self.input[self.pos..].to_lowercase().starts_with("public") {
+                            self.pos += 6;
+                            self.state = TokenizerState::BeforeDoctypePublicId
+                        } else if self.input[self.pos..].to_lowercase().starts_with("system") {
+                            self.pos += 6;
+                            self.state = TokenizerState::BeforeDoctypePublicId
+                        }
+                    },
+                    TokenizerState::AfterDoctypePublicId => self.state = TokenizerState::DoctypeSystemId,
+                    _ => {}
+                }
+            }
+            '>' => {
+                if self.state == TokenizerState::BogusDoctype {
+                    if let Some(Token::Doctype { ref mut force_quirks, .. }) = self.current_token {
+                        *force_quirks = true;
+                    }
+                }
+                self.commit_token();
+                self.state = TokenizerState::Data;
+            }
+            _ => {
+                self.buffer.push(c);
+                match self.state {
+                    TokenizerState::Doctype => {
+                        self.state = TokenizerState::BogusDoctype;
+                    },
+                    TokenizerState::DoctypeName => {
+                        if let Some(Token::Doctype { ref mut name, .. }) = self.current_token {
+                            if name.is_none() {
+                                *name = Some(c.to_string());
+                            } else if let Some(ref mut n) = name {
+                                n.push(c);
+                            }
+                        }
+                    },
+                    TokenizerState::BeforeDoctypePublicId => {
+                        match c {
+                            '"' => self.state = TokenizerState::DoctypePublicIdWithDoubleQuote,
+                            '\'' => self.state = TokenizerState::DoctypePublicIdWithSingleQuote,
+                            _ if c.is_whitespace() => {}, // 無視
+                            _ => {
+                                // 不正な文字
+                                self.state = TokenizerState::BogusDoctype;
+                            }
+                        }
+                        if let Some(Token::Doctype { ref mut public_id, .. }) = self.current_token {
+                            *public_id = Some(c.to_string());
+                        }
+                    },
+                    TokenizerState::DoctypePublicIdWithSingleQuote | TokenizerState::DoctypePublicIdWithDoubleQuote => {
+                        if let Some(Token::Doctype { ref mut public_id, .. }) = self.current_token {
+                            if let Some(ref mut pid) = public_id {
+                                pid.push(c);
+                            }
+                        }
+                        if (self.state == TokenizerState::DoctypePublicIdWithSingleQuote && c == '\'') ||
+                           (self.state == TokenizerState::DoctypePublicIdWithDoubleQuote && c == '"') {
+                            self.state = TokenizerState::AfterDoctypePublicId;
+                        }
+                    },
+                    TokenizerState::DoctypeSystemId => {
+                        if let Some(Token::Doctype { ref mut system_id, .. }) = self.current_token {
+                            if system_id.is_none() {
+                                *system_id = Some(c.to_string());
+                            } else if let Some(ref mut sid) = system_id {
+                                sid.push(c);
+                            }
+                        }
+                    },
+                    _ => {}
+                }
             }
         }
     }
