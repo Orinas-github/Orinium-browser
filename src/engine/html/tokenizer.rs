@@ -117,11 +117,11 @@ impl<'a> Tokenizer<'a> {
                 TokenizerState::TagOpen => self.state_tag_open(c),
                 TokenizerState::TagName => self.state_tag_name(c),
                 _ if self.state.is_doctype() => self.state_doctype(c),
-                //TokenizerState::BeforeAttributeName => self.state_before_attribute_name(c),
-                //TokenizerState::AttributeName => self.state_attribute_name(c),
-                //TokenizerState::BeforeAttributeValue => self.state_before_attribute_value(c),
-                //TokenizerState::AttributeValueDoubleQuoted => self.state_attribute_value_double_quoted(c),
-                //TokenizerState::AttributeValueSingleQuoted => self.state_attribute_value_single_quoted(c),
+                TokenizerState::BeforeAttributeName => self.state_before_attribute_name(c),
+                TokenizerState::AttributeName => self.state_attribute_name(c),
+                TokenizerState::BeforeAttributeValue => self.state_before_attribute_value(c),
+                TokenizerState::AttributeValueDoubleQuoted | TokenizerState::AttributeValueSingleQuoted => self.state_attribute_value_quoted(c),
+                TokenizerState::AfterAttributeName => self.state_after_attribute_name(c),
                 //TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
                 //TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
                 //TokenizerState::EndTagOpen => self.state_end_tag_open(c),
@@ -307,6 +307,134 @@ impl<'a> Tokenizer<'a> {
                     },
                     _ => {}
                 }
+            }
+        }
+    }
+
+    fn state_before_attribute_name(&mut self, c: char) {
+        match c {
+            c if c.is_whitespace() => {} // 無視
+            '/' => self.state = TokenizerState::SelfClosingStartTag,
+            '>' => {
+                self.commit_token();
+                self.state = TokenizerState::Data;
+            }
+            c if c.is_ascii_alphanumeric() => {
+                self.state = TokenizerState::AttributeName;
+                self.buffer.push(c);
+                self.current_attribute = Some(Attribute {
+                    name: c.to_string(),
+                    value: String::new(),
+                });
+            }
+            _ => { // 不正な文字
+                // 壊れたトークンは無視
+            }
+        }
+    }
+
+    fn state_attribute_name(&mut self, c: char) {
+        match c {
+            c if c.is_whitespace() => self.state = TokenizerState::AfterAttributeName,
+            '=' => self.state = TokenizerState::BeforeAttributeValue,
+            '/' => {
+                if let Some(attr) = self.current_attribute.take() {
+                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                        attributes.push(attr);
+                    }
+                }
+                self.state = TokenizerState::SelfClosingStartTag;
+            }
+            '>' => {
+                if let Some(attr) = self.current_attribute.take() {
+                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                        attributes.push(attr);
+                    }
+                }
+                self.commit_token();
+                self.state = TokenizerState::Data;
+            }
+            c if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == ':' => {
+                self.buffer.push(c);
+                if let Some(ref mut attr) = self.current_attribute {
+                    attr.name.push(c);
+                }
+            }
+            _ => { // 不正な文字
+                // 壊れたトークンは無視
+            }
+        }
+    }
+
+    fn state_before_attribute_value(&mut self, c: char) {
+        match c {
+            c if c.is_whitespace() => {} // 無視
+            '"' => self.state = TokenizerState::AttributeValueDoubleQuoted,
+            '\'' => self.state = TokenizerState::AttributeValueSingleQuoted,
+            '>' => {
+                // 属性値がない場合は空文字列として扱う
+                if let Some(attr) = self.current_attribute.take() {
+                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                        attributes.push(attr);
+                    }
+                }
+                self.commit_token();
+                self.state = TokenizerState::Data;
+            }
+            _ => {
+                // 属性値が引用符で囲まれていない場合
+                self.state = TokenizerState::AttributeValueUnquoted;
+                if let Some(ref mut attr) = self.current_attribute {
+                    attr.value.push(c);
+                }
+            }
+        }
+    }
+
+    fn state_attribute_value_quoted(&mut self, c: char) {
+        match c {
+            '"' if self.state == TokenizerState::AttributeValueDoubleQuoted => {
+                if let Some(attr) = self.current_attribute.take() {
+                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                        attributes.push(attr);
+                    }
+                }
+                self.state = TokenizerState::AfterAttributeName;
+            }
+            '\'' if self.state == TokenizerState::AttributeValueSingleQuoted => {
+                if let Some(attr) = self.current_attribute.take() {
+                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                        attributes.push(attr);
+                    }
+                }
+                self.state = TokenizerState::AfterAttributeName;
+            }
+            _ => {
+                if let Some(ref mut attr) = self.current_attribute {
+                    attr.value.push(c);
+                }
+            }
+        }
+    }
+
+    fn state_after_attribute_name(&mut self, c: char) {
+        match c {
+            c if c.is_whitespace() => {} // 無視
+            '/' => self.state = TokenizerState::SelfClosingStartTag,
+            '>' => {
+                self.commit_token();
+                self.state = TokenizerState::Data;
+            }
+            c if c.is_ascii_alphanumeric() => {
+                self.state = TokenizerState::AttributeName;
+                self.buffer.push(c);
+                self.current_attribute = Some(Attribute {
+                    name: c.to_string(),
+                    value: String::new(),
+                });
+            }
+            _ => { // 不正な文字
+                // 壊れたトークンは無視
             }
         }
     }
