@@ -65,6 +65,7 @@ pub struct Tokenizer<'a> {
     buffer: String,
 }
 
+#[allow(dead_code)]
 impl TokenizerState {
     fn is_doctype(&self) -> bool {
         matches!(
@@ -77,6 +78,15 @@ impl TokenizerState {
                 | TokenizerState::AfterDoctypePublicId
                 | TokenizerState::DoctypeSystemId
                 | TokenizerState::BogusDoctype
+        )
+    }
+
+    fn is_comment(&self) -> bool {
+        matches!(
+            self,
+            TokenizerState::Comment
+                | TokenizerState::CommentStartDash
+                | TokenizerState::CommentEndDash
         )
     }
 }
@@ -115,8 +125,7 @@ impl<'a> Tokenizer<'a> {
                 //TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
                 //TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
                 //TokenizerState::EndTagOpen => self.state_end_tag_open(c),
-                //TokenizerState::Comment | TokenizerState::CommentStartDash | TokenizerState::CommentEndDash => self.state_comment(c),
-
+                //_ if self.state.is_comment() => self.state_comment(c),
                 //TokenizerState::BogusComment => self.state_bogus_comment(c),
                 _ => {
                     // 未実装の状態は無視してData状態に戻る
