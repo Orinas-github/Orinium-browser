@@ -4,5 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-browser-gui = {path = "browser-gui" }
 resolver = "2"
+
+[dependencies]
+tokio = { version = "1.47.1", features = ["full"] }
+winit = "0.30.12"
+wgpu = "26.0.1"
