@@ -124,7 +124,7 @@ impl<'a> Tokenizer<'a> {
                 TokenizerState::AfterAttributeName => self.state_after_attribute_name(c),
                 TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
                 //TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
-                //TokenizerState::EndTagOpen => self.state_end_tag_open(c),
+                TokenizerState::EndTagOpen => self.state_end_tag_open(c),
                 //_ if self.state.is_comment() => self.state_comment(c),
                 //TokenizerState::BogusComment => self.state_bogus_comment(c),
                 _ => {
@@ -147,7 +147,10 @@ impl<'a> Tokenizer<'a> {
 
     fn state_data(&mut self, c: char) {
         match c {
-            '<' => self.state = TokenizerState::TagOpen,
+            '<' => {
+                self.commit_token();
+                self.state = TokenizerState::TagOpen
+            },
             '&' => {
                 todo!(); // エスケープ処理 (未実装)
             }
@@ -462,6 +465,26 @@ impl<'a> Tokenizer<'a> {
                 if let Some(ref mut attr) = self.current_attribute {
                     attr.value.push(c);
                 }
+            }
+        }
+    }
+
+    fn state_end_tag_open(&mut self, c: char) {
+        match c {
+            c if c.is_ascii_alphabetic() => {
+                self.state = TokenizerState::TagName;
+                self.buffer.push(c);
+                self.current_token = Some(Token::EndTag {
+                    name: c.to_string(),
+                });
+            }
+            '>' => {
+                // 壊れたトークンは無視
+                self.state = TokenizerState::Data;
+            }
+            _ => {
+                // 壊れたトークンは無視
+                self.state = TokenizerState::Data;
             }
         }
     }
