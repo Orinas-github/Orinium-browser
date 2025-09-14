@@ -122,7 +122,7 @@ impl<'a> Tokenizer<'a> {
                 TokenizerState::BeforeAttributeValue => self.state_before_attribute_value(c),
                 TokenizerState::AttributeValueDoubleQuoted | TokenizerState::AttributeValueSingleQuoted => self.state_attribute_value_quoted(c),
                 TokenizerState::AfterAttributeName => self.state_after_attribute_name(c),
-                //TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
+                TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
                 //TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
                 //TokenizerState::EndTagOpen => self.state_end_tag_open(c),
                 //_ if self.state.is_comment() => self.state_comment(c),
@@ -435,6 +435,33 @@ impl<'a> Tokenizer<'a> {
             }
             _ => { // 不正な文字
                 // 壊れたトークンは無視
+            }
+        }
+    }
+
+    fn state_attribute_value_unquoted(&mut self, c: char) {
+        match c {
+            c if c.is_whitespace() => {
+                if let Some(attr) = self.current_attribute.take() {
+                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                        attributes.push(attr);
+                    }
+                }
+                self.state = TokenizerState::BeforeAttributeName;
+            }
+            '>' => {
+                if let Some(attr) = self.current_attribute.take() {
+                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                        attributes.push(attr);
+                    }
+                }
+                self.commit_token();
+                self.state = TokenizerState::Data;
+            }
+            _ => {
+                if let Some(ref mut attr) = self.current_attribute {
+                    attr.value.push(c);
+                }
             }
         }
     }
