@@ -5,7 +5,6 @@ use anyhow::{Result, Context};
 mod platform;
 mod engine;
 use engine::html::parser;
-use futures::future::ok;
 use platform::network;
 
 #[tokio::main]
@@ -31,28 +30,27 @@ async fn main() -> Result<()> {
         let html = r#"<!DOCTYPE html>
 <html lang="ja">
 <head>
-    <title>Orinium Browser テストページ</title>
+    <title>Orinium Browser DOM Test</title>
     <!-- コメント -->
 </head>
 <body>
-    <h1>Orinium Browser へようこそ</h1>
-    <p>これは <b>テスト</b> ページです。</p>
+    <p>This is a <b>test page</b> for DOM module debuging.</p>
     <div>
-        <p>ネストされた <span>span テキスト</span></p>
+        <p>Nested <span>span text</span></p>
         <img src="image.png">
         <br />
-        <input type="text" value="テキスト入力" />
-        <p>閉じていない段落
+        <input type="text" value="Hello" />
+        <p>Unclosed paragraph
     </div>
-    <footer>フッターコンテンツ</footer>
+    <footer>Footer content</footer>
 </body>
 </html>
 "#;
-        println!("use default html code...");
+        println!("Using the default test html code...");
         html.to_string()
     };
 
-    println!("parsing html code...");
+    println!("Parsing HTML: {}\n", html);
     let mut parser = parser::Parser::new(&html);
     let dom = parser.parse();
     parser::print_dom_tree(&dom,"" , true);
