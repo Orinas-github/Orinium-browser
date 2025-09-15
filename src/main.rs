@@ -5,6 +5,7 @@ use anyhow::{Result, Context};
 mod platform;
 mod engine;
 use engine::html::parser;
+use futures::future::ok;
 use platform::network;
 
 #[tokio::main]
@@ -55,4 +56,5 @@ async fn main() -> Result<()> {
     let mut parser = parser::Parser::new(&html);
     let dom = parser.parse();
     parser::print_dom_tree(&dom,"" , true);
+    Ok(())
 }
