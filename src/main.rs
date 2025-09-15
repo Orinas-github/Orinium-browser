@@ -2,7 +2,7 @@ use std::env;
 
 mod platform;
 mod engine;
-use engine::html::tokenizer::{Tokenizer};
+use engine::html::parser;
 
 #[tokio::main]
 async fn main() {
@@ -33,8 +33,7 @@ async fn main() {
 "#;
 
     print!("Parsing HTML: {}\n", html);
-    let mut tokenizer = Tokenizer::new(html);
-    while let Some(token) = tokenizer.next_token() {
-        println!("{:?}", token);
-    }
+    let mut parser = parser::Parser::new(html);
+    let dom = parser.parse();
+    parser::print_dom(&dom, 0);
 }
