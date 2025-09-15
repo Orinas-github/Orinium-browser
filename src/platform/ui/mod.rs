@@ -25,11 +25,10 @@ impl State{
     }
     
     pub fn resize(&mut self, _width: u32, _height: u32) {
-        // これから実装します。
+        // これから実装
     }
     
     pub fn render(&mut self) {
-        // ウィンドウにできるだけ早く次のフレームを描画するように要求する
         self.window.request_redraw();
     }
 }
