@@ -4,6 +4,7 @@ use engine::html::tokenizer::{Tokenizer};
 
 #[tokio::main]
 async fn main() {
+    env_logger::init();
     println!("Hello, Orinium Browser!");
 
     let html = r#"<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">

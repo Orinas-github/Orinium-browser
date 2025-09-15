@@ -8,5 +8,7 @@ resolver = "2"
 
 [dependencies]
 tokio = { version = "1.47.1", features = ["full"] }
+env_logger = "0.10.2"
+log = "0.4"
 winit = "0.30.12"
 wgpu = "26.0.1"

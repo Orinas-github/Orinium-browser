@@ -143,6 +143,9 @@ impl<'a> Tokenizer<'a> {
 
     fn commit_token(&mut self) {
         self.token = self.current_token.take();
+        self.buffer.clear();
+        log::debug!("Committed token: {:?}", self.token);
+
     }
 
     fn state_data(&mut self, c: char) {
