@@ -43,6 +43,7 @@ pub enum TokenizerState {
     CommentStartDash,
     Comment,
     CommentEndDash,
+    CommentEnd,
     BogusComment,
     Doctype,
     DoctypeName,
@@ -87,6 +88,7 @@ impl TokenizerState {
             TokenizerState::Comment
                 | TokenizerState::CommentStartDash
                 | TokenizerState::CommentEndDash
+                | TokenizerState::CommentEnd
         )
     }
 }
@@ -125,7 +127,7 @@ impl<'a> Tokenizer<'a> {
                 TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
                 //TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
                 TokenizerState::EndTagOpen => self.state_end_tag_open(c),
-                //_ if self.state.is_comment() => self.state_comment(c),
+                _ if self.state.is_comment() => self.state_comment(c),
                 //TokenizerState::BogusComment => self.state_bogus_comment(c),
                 _ => {
                     // 未実装の状態は無視してData状態に戻る
@@ -172,7 +174,8 @@ impl<'a> Tokenizer<'a> {
         match c {
             '/' => self.state = TokenizerState::EndTagOpen,
             '!' => {
-                if c == '-' {
+                if self.input[self.pos..].starts_with('-') {
+                    self.pos += 1;
                     self.state = TokenizerState::CommentStartDash;
                 } else if self.input[self.pos..].to_lowercase().starts_with("doctype") {
                     self.pos += 7;
@@ -489,6 +492,50 @@ impl<'a> Tokenizer<'a> {
                 // 壊れたトークンは無視
                 self.state = TokenizerState::Data;
             }
+        }
+    }
+
+    fn state_comment(&mut self, c: char) {
+        match self.state {
+            TokenizerState::CommentStartDash => {
+                if c == '-' {
+                    self.state = TokenizerState::Comment;
+                    self.current_token = Some(Token::Comment(String::new()));
+                } else {
+                    self.state = TokenizerState::BogusComment;
+                }
+            }
+            TokenizerState::Comment => {
+                if c == '-' {
+                    self.state = TokenizerState::CommentEndDash;
+                } else {
+                    if let Some(Token::Comment(ref mut comment)) = self.current_token {
+                        comment.push(c);
+                    }
+                }
+            }
+            TokenizerState::CommentEndDash => {
+                if c == '-' {
+                    // コメント終了
+                    self.state = TokenizerState::CommentEnd;
+                } else {
+                    self.state = TokenizerState::Comment;
+                    self.buffer.push('-');
+                    self.buffer.push(c);
+                    if let Some(Token::Comment(ref mut comment)) = self.current_token {
+                        comment.push('-');
+                        comment.push(c);
+                    } else {
+                        self.current_token = Some(Token::Comment(format!("-{}", c)));
+                    }
+                }
+            }
+            _ => {}
+        }
+
+        if self.state == TokenizerState::CommentEnd {
+            self.commit_token();
+            self.state = TokenizerState::Data;
         }
     }
 }
