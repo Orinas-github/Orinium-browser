@@ -83,14 +83,14 @@ struct CacheEntry {
 }
 
 #[derive(Debug)]
-pub struct NetworkManager {
+pub struct NetworkCore {
     client: Client,
     cache: Arc<RwLock<HashMap<String, CacheEntry>>>,
     default_options: RequestOptions,
 }
 
-// NetworkManager implementation
-impl NetworkManager {
+// NetworkCore implementation
+impl NetworkCore {
     pub fn new() -> Result<Self> {
         let client = ClientBuilder::new()
             .user_agent(format!(
@@ -285,25 +285,6 @@ impl NetworkManager {
         cache.clear();
         log::info!("Cache cleared");
     }
-}
-
-// load
-pub async fn load_html_page(url: &str) -> Result<String> {
-    let network = NetworkManager::new()?;
-    let response = network.fetch(url).await?;
-    if !response.status.is_success() {
-        return Err(anyhow::anyhow!(
-            "Failed to retrieve page: HTTP {} {}",
-            response.status.as_u16(),
-            response.status.canonical_reason().unwrap_or("")
-        ));
-    }
-    if response.resource_type != ResourceType::Html {
-        log::warn!("Resource specified as HTML is of a different type: {:?}", response.resource_type);
-    }
-    let html = String::from_utf8(response.body)
-        .context("Failed to decode HTML content as UTF-8")?;
-    Ok(html)
 }
 
 pub async fn load_local_file(path: &str) -> Result<Vec<u8>> {
