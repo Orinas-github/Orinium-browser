@@ -14,3 +14,8 @@ env_logger = "0.10.2"
 log = "0.4"
 winit = "0.30.12"
 wgpu = "26.0.1"
+reqwest = { version = "0.12", features = ["json", "cookies", "gzip", "brotli", "deflate"] }
+url = "2.5"
+mime = "0.3"
+http = "1.1"
+futures = "0.3"
