@@ -1,26 +1,39 @@
+use std::env;
+
 mod platform;
 mod engine;
-use engine::html::tokenizer::{Tokenizer};
+use engine::html::parser;
 
 #[tokio::main]
 async fn main() {
+    #[allow(unused)]
+    let args: Vec<String> = env::args().collect::<Vec<String>>();
+
+    env_logger::init();
     println!("Hello, Orinium Browser!");
 
-    let html = r#"<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en">
+    let html = r#"<!DOCTYPE html>
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>TEST</title>
+    <title>Test</title>
+    <!-- コメント -->
 </head>
 <body>
-    <h1 id="main-title">TEST</h1>
-    <p id="intro">This is a paragraph using HTML 4.01 Strict Doctype.</p>
+    <p>Hello <b>World</b></p>
+    <div>
+        <p>Nested <span>span text</span></p>
+        <img src="image.png">
+        <br />
+        <input type="text" value="Hello" />
+        <p>Unclosed paragraph
+    </div>
+    <footer>Footer content</footer>
 </body>
 </html>
 "#;
+
     print!("Parsing HTML: {}\n", html);
-    let mut tokenizer = Tokenizer::new(html);
-    while let Some(token) = tokenizer.next_token() {
-        println!("{:?}", token);
-    }
+    let mut parser = parser::Parser::new(html);
+    let dom = parser.parse();
+    parser::print_dom_tree(&dom,"" , true);
 }
