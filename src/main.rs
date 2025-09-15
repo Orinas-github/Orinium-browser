@@ -23,13 +23,15 @@ async fn main() {
     <div>
         <p>Nested <span>span text</span></p>
         <img src="image.png">
+        <br />
+        <input type="text" value="Hello" />
         <p>Unclosed paragraph
     </div>
     <footer>Footer content</footer>
 </body>
 </html>
-
 "#;
+
     print!("Parsing HTML: {}\n", html);
     let mut tokenizer = Tokenizer::new(html);
     while let Some(token) = tokenizer.next_token() {

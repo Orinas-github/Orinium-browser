@@ -113,20 +113,20 @@ impl<'a> Tokenizer<'a> {
             let c = self.input[self.pos..].chars().next().unwrap();
             self.pos += c.len_utf8();
 
-            print!("State: {:?}, Char: '{}'\n", self.state, c);
+            //print!("State: {:?}, Char: '{}'\n", self.state, c);
 
             match self.state {
                 TokenizerState::Data => self.state_data(c),
+                _ if self.state.is_doctype() => self.state_doctype(c),
                 TokenizerState::TagOpen => self.state_tag_open(c),
                 TokenizerState::TagName => self.state_tag_name(c),
-                _ if self.state.is_doctype() => self.state_doctype(c),
                 TokenizerState::BeforeAttributeName => self.state_before_attribute_name(c),
                 TokenizerState::AttributeName => self.state_attribute_name(c),
                 TokenizerState::BeforeAttributeValue => self.state_before_attribute_value(c),
                 TokenizerState::AttributeValueDoubleQuoted | TokenizerState::AttributeValueSingleQuoted => self.state_attribute_value_quoted(c),
                 TokenizerState::AfterAttributeName => self.state_after_attribute_name(c),
                 TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
-                //TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
+                TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
                 TokenizerState::EndTagOpen => self.state_end_tag_open(c),
                 _ if self.state.is_comment() => self.state_comment(c),
                 _ => {
@@ -478,6 +478,22 @@ impl<'a> Tokenizer<'a> {
                 if let Some(ref mut attr) = self.current_attribute {
                     attr.value.push(c);
                 }
+            }
+        }
+    }
+
+    fn state_self_closing_start_tag(&mut self, c: char) {
+        match c {
+            '>' => {
+                if let Some(Token::StartTag { ref mut self_closing, .. }) = self.current_token {
+                    *self_closing = true;
+                }
+                self.commit_token();
+                self.state = TokenizerState::Data;
+            }
+            _ => {
+                // 壊れたトークンは無視
+                self.state = TokenizerState::Data;
             }
         }
     }
