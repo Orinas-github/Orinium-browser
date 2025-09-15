@@ -1,9 +1,14 @@
+use std::env;
+
 mod platform;
 mod engine;
 use engine::html::tokenizer::{Tokenizer};
 
 #[tokio::main]
 async fn main() {
+    #[allow(unused)]
+    let args: Vec<String> = env::args().collect::<Vec<String>>();
+
     env_logger::init();
     println!("Hello, Orinium Browser!");
 
