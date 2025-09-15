@@ -123,25 +123,52 @@ impl<'a> Parser<'a> {
 
 }
 
-/// DOM ツリーをインデント付きで表示するデバッグ用関数
-pub fn print_dom(node: &NodeRef, indent: usize) {
-    let pad = "  ".repeat(indent);
+/// DOMTreeを見やすく表示するデバッグ用関数
+/// `prefix` は親からの接続線の情報を渡す
+pub fn print_dom_tree(node: &NodeRef, prefix: &str, is_last: bool) {
     let n = node.borrow();
 
+    // connector を決める
+    let connector = if prefix.is_empty() { "" } else if is_last { "└── " } else { "├── " };
+
     match &n.node_type {
-        NodeType::Document => println!("{}Document", pad),
+        NodeType::Document => println!("{}{}Document", prefix, connector),
         NodeType::Element { tag_name, attributes } => {
-            println!("{}Element: {} attrs={:?}", pad, tag_name, attributes);
+            let attrs_str = if attributes.is_empty() {
+                "".to_string()
+            } else {
+                let attrs_list = attributes.iter()
+                    .map(|attr| format!("{}=\"{}\"", attr.name, attr.value))
+                    .collect::<Vec<_>>()
+                    .join(" ");
+                format!(" [{}]", attrs_list)
+            };
+            println!("{}{}Element: {}{}", prefix, connector, tag_name, attrs_str);
         }
-        NodeType::Text(data) => println!("{}Text: {:?}", pad, data),
-        NodeType::Comment(data) => println!("{}Comment: {:?}", pad, data),
+        NodeType::Text(data) => {
+            // 空白や改行だけの Text は簡略化
+            let trimmed = data.trim();
+            if !trimmed.is_empty() {
+                println!("{}{}Text: {:?}", prefix, connector, trimmed);
+            }
+        }
+        NodeType::Comment(data) => println!("{}{}Comment: {:?}", prefix, connector, data),
         NodeType::Doctype { name, public_id, system_id } => {
-            println!("{}Doctype: name={:?}, public_id={:?}, system_id={:?}", pad, name, public_id, system_id);
+            println!("{}{}Doctype: name={:?}, public_id={:?}, system_id={:?}", prefix, connector, name, public_id, system_id);
         }
     }
 
-    // 子ノードを再帰的に表示
-    for child in &n.children {
-        print_dom(child, indent + 1);
+    let child_count = n.children.len();
+    for (i, child) in n.children.iter().enumerate() {
+        let child_is_last = i == child_count - 1;
+
+        // 新しい prefix を作成
+        let new_prefix = if is_last {
+            format!("{}    ", prefix)
+        } else {
+            format!("{}│   ", prefix)
+        };
+
+        print_dom_tree(child, &new_prefix, child_is_last);
     }
 }

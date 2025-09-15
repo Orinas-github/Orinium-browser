@@ -54,7 +54,5 @@ async fn main() -> Result<()> {
     println!("parsing html code...");
     let mut parser = parser::Parser::new(&html);
     let dom = parser.parse();
-    parser::print_dom(&dom, 0);
-
-    Ok(())
+    parser::print_dom_tree(&dom,"" , true);
 }
