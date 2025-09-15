@@ -12,17 +12,23 @@ async fn main() {
     env_logger::init();
     println!("Hello, Orinium Browser!");
 
-    let html = r#"<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en">
+    let html = r#"<!DOCTYPE html>
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>TEST</title>
+    <title>Test</title>
+    <!-- コメント -->
 </head>
 <body>
-    <h1 id="main-title">TEST</h1>
-    <p id="intro">This is a paragraph using HTML 4.01 Strict Doctype.</p>
+    <p>Hello <b>World</b></p>
+    <div>
+        <p>Nested <span>span text</span></p>
+        <img src="image.png">
+        <p>Unclosed paragraph
+    </div>
+    <footer>Footer content</footer>
 </body>
 </html>
+
 "#;
     print!("Parsing HTML: {}\n", html);
     let mut tokenizer = Tokenizer::new(html);
