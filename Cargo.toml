@@ -7,7 +7,9 @@ edition = "2021"
 resolver = "2"
 
 [dependencies]
+anyhow = "1.0"
 tokio = { version = "1.47.1", features = ["full"] }
+pollster = "0.3"
 env_logger = "0.10.2"
 log = "0.4"
 winit = "0.30.12"
