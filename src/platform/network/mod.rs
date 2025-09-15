@@ -3,7 +3,6 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
 use anyhow::{Context, Result};
-use log::{debug, info, warn};
 use reqwest::{Client, ClientBuilder, Method, StatusCode, Url};
 use tokio::sync::RwLock;
 
@@ -122,7 +121,7 @@ impl NetworkManager {
         let url_obj = Url::parse(url).context("Invalid URL")?;
         
         if let Some(cached) = self.get_from_cache(&url_obj).await {
-            info!("Resource retrieved from cache: {}", url);
+            log::info!("Resource retrieved from cache: {}", url);
             return Ok(cached);
         }
 
@@ -132,7 +131,7 @@ impl NetworkManager {
             request_builder = request_builder.header(name, value);
         }
 
-        info!("Starting to fetch resource: {}", url);
+        log::info!("Starting to fetch resource: {}", url);
         let response = request_builder
             .send()
             .await
@@ -197,7 +196,7 @@ impl NetworkManager {
             request_builder = request_builder.header(name, value);
         }
 
-        info!("Sending POST request: {}", url);
+        log::info!("Sending POST request: {}", url);
         let response = request_builder
             .send()
             .await
@@ -238,14 +237,14 @@ impl NetworkManager {
         if let Some(entry) = cache.get(key) {
             if let Some(expires_at) = entry.expires_at {
                 if SystemTime::now() > expires_at {
-                    debug!("Cache expired: {}", key);
+                    log::debug!("Cache expired: {}", key);
                     return None;
                 }
             }
-            debug!("Cache hit: {}", key);
+            log::debug!("Cache hit: {}", key);
             return Some(entry.response.clone());
         }
-        debug!("Cache miss: {}", key);
+        log::debug!("Cache miss: {}", key);
         None
     }
 
@@ -284,7 +283,7 @@ impl NetworkManager {
     pub async fn clear_cache(&self) {
         let mut cache = self.cache.write().await;
         cache.clear();
-        info!("Cache cleared");
+        log::info!("Cache cleared");
     }
 }
 
@@ -300,7 +299,7 @@ pub async fn load_html_page(url: &str) -> Result<String> {
         ));
     }
     if response.resource_type != ResourceType::Html {
-        warn!("Resource specified as HTML is of a different type: {:?}", response.resource_type);
+        log::warn!("Resource specified as HTML is of a different type: {:?}", response.resource_type);
     }
     let html = String::from_utf8(response.body)
         .context("Failed to decode HTML content as UTF-8")?;
