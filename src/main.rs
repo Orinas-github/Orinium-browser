@@ -6,6 +6,7 @@ mod platform;
 mod engine;
 use engine::html::parser;
 use platform::network;
+use platform::io;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -26,7 +27,7 @@ async fn main() -> Result<()> {
         String::from_utf8(bytes).context("Warn: Resoulse was'nt encoded by UTF-8")?
     } else if Path::new(&url_or_path).exists() {
         println!("loading local file[{}]", url_or_path);
-        let bytes = network::load_local_file(&url_or_path).await?;
+        let bytes = io::load_local_file(&url_or_path).await?;
         String::from_utf8(bytes).context("Warn: Resoulse was'nt encoded by UTF-8")?
     } else {
         let html = r#"<!DOCTYPE html>

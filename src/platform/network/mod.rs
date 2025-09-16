@@ -5,6 +5,9 @@ use std::time::{Duration, SystemTime};
 use anyhow::{Context, Result};
 use reqwest::{Client, ClientBuilder, Method, StatusCode, Url};
 use tokio::sync::RwLock;
+use mime::Mime;
+
+#[allow(dead_code)]
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ResourceType {
@@ -19,18 +22,19 @@ pub enum ResourceType {
 // resource type detection based on content-type
 impl ResourceType {
     pub fn from_content_type(content_type: &str) -> Self {
-        if content_type.contains("text/html") {
-            ResourceType::Html
-        } else if content_type.contains("text/css") {
-            ResourceType::Css
-        } else if content_type.contains("javascript") || content_type.contains("ecmascript") {
-            ResourceType::JavaScript
-        } else if content_type.contains("image/") {
-            ResourceType::Image
-        } else if content_type.contains("font/") || content_type.contains("application/font") {
-            ResourceType::Font
-        } else {
-            ResourceType::Other
+        match content_type.parse::<Mime>() {
+            Ok(mime) => {
+                match (mime.type_(), mime.subtype()) {
+                    (mime::TEXT, mime::HTML) => ResourceType::Html,
+                    (mime::TEXT, mime::CSS) => ResourceType::Css,
+                    (mime::APPLICATION, mime::JAVASCRIPT) | (mime::TEXT, mime::JAVASCRIPT) => ResourceType::JavaScript,
+                    (mime::IMAGE, _) => ResourceType::Image,
+                    (mime::FONT, _) => ResourceType::Font,
+                    (mime::APPLICATION, subtype) if subtype == "font-woff" || subtype == "font-woff2" => ResourceType::Font,
+                    _ => ResourceType::Other,
+                }
+            }
+            Err(_) => ResourceType::Other,
         }
     }
 
@@ -47,6 +51,7 @@ impl ResourceType {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct RequestConfig {
     pub timeout_ms: u64,
     pub follow_redirects: bool,
@@ -67,6 +72,7 @@ impl Default for RequestConfig {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct Response {
     pub status: StatusCode,
     pub headers: HashMap<String, String>,
@@ -76,6 +82,7 @@ pub struct Response {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 struct CacheEntry {
     response: Response,
     cached_at: SystemTime,
@@ -90,6 +97,7 @@ pub struct NetworkCore {
 }
 
 // NetworkCore implementation
+#[allow(dead_code)]
 impl NetworkCore {
     pub fn new() -> Result<Self> {
         let client = ClientBuilder::new()
@@ -285,15 +293,6 @@ impl NetworkCore {
         cache.clear();
         log::info!("Cache cleared");
     }
-}
-
-pub async fn load_local_file(path: &str) -> Result<Vec<u8>> {
-    use tokio::fs::File;
-    use tokio::io::AsyncReadExt;
-    let mut file = File::open(path).await.context("Failed to open file")?;
-    let mut contents = Vec::new();
-    file.read_to_end(&mut contents).await.context("Failed to read file")?;
-    Ok(contents)
 }
 
 #[cfg(test)]
