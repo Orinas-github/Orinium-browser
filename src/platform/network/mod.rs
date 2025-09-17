@@ -7,6 +7,9 @@ use reqwest::{Client, ClientBuilder, Method, StatusCode, Url};
 use tokio::sync::RwLock;
 use mime::Mime;
 
+/* TLS signeture module */
+pub mod sig;
+
 #[allow(dead_code)]
 
 #[derive(Debug, Clone, PartialEq, Eq)]
