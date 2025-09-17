@@ -8,7 +8,6 @@ use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 use anyhow::{Context, Result, anyhow};
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
-use log::{error, info, warn};
 use rustls::{ClientConfig, RootCertStore};
 use rustls::pki_types::{CertificateDer, ServerName};
 use rustls_native_certs::load_native_certs;
@@ -62,15 +61,15 @@ impl CertificateVerifier {
             Ok(certs) => {
                 for cert in certs {
                     if let Err(e) = root_store.add(cert) {
-                        warn!("ルート証明書の追加に失敗: {:?}", e);
+                        log::warn!("ルート証明書の追加に失敗: {:?}", e);
                     }
                 }
-                info!("システムから{}個のルート証明書を読み込みました", root_store.len());
+                log::info!("システムから{}個のルート証明書を読み込みました", root_store.len());
             }
             Err(e) => {
-                warn!("システムのルート証明書の読み込みに失敗: {:?}", e);
+                log::warn!("システムのルート証明書の読み込みに失敗: {:?}", e);
                 root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
-                info!("webpki-rootsから{}個のルート証明書を読み込みました", root_store.len());
+                log::info!("webpki-rootsから{}個のルート証明書を読み込みました", root_store.len());
             }
         }
         Ok(Self {
@@ -218,7 +217,7 @@ impl CertificateVerifier {
                 }
             }
             CertificatePolicy::AllowAll => {
-                warn!("安全でないモード: すべての証明書を検証なしで許可しています");
+                log::warn!("安全でないモード: すべての証明書を検証なしで許可しています");
                 Ok(())
             }
         }
@@ -310,7 +309,7 @@ impl CertificateManager {
         }
         let certificate = CertificateDer::from(cert_data);
         let info = CertificateVerifier::extract_certificate_info(&certificate)?;
-        info!("証明書を読み込みました: 発行者={}, 対象={}, 期限={:?}", 
+        log::info!("証明書を読み込みました: 発行者={}, 対象={}, 期限={:?}", 
               info.issuer, info.subject, info.not_after);
         Ok(certificate)
     }
@@ -318,29 +317,29 @@ impl CertificateManager {
         let fingerprint = CertificateVerifier::calculate_fingerprint(cert);
         let mut verifier = self.verifier.write().await;
         verifier.add_pinned_certificate(domain, &fingerprint);
-        info!("証明書のピン留めを追加しました: ドメイン={}, フィンガープリント={}", domain, fingerprint);
+        log::info!("証明書のピン留めを追加しました: ドメイン={}, フィンガープリント={}", domain, fingerprint);
         Ok(())
     }
     pub async fn approve_certificate(&self, domain: &str, cert: Certificate) -> Result<()> {
         let mut verifier = self.verifier.write().await;
         verifier.approve_certificate(domain, cert);
-        info!("証明書を承認しました: ドメイン={}", domain);
+        log::info!("証明書を承認しました: ドメイン={}", domain);
         Ok(())
     }
     pub async fn reject_certificate(&self, cert: &Certificate) -> Result<()> {
         let fingerprint = CertificateVerifier::calculate_fingerprint(cert);
         let mut verifier = self.verifier.write().await;
         verifier.reject_certificate(&fingerprint);
-        info!("証明書を拒否リストに追加しました: フィンガープリント={}", fingerprint);
+        log::info!("証明書を拒否リストに追加しました: フィンガープリント={}", fingerprint);
         Ok(())
     }
     pub async fn set_policy(&self, policy: CertificatePolicy) {
         let mut verifier = self.verifier.write().await;
         match &policy {
-            CertificatePolicy::Default => info!("証明書検証ポリシーを「デフォルト」に設定しました"),
-            CertificatePolicy::CertificatePinning(_) => info!("証明書検証ポリシーを「証明書ピン留め」に設定しました"),
-            CertificatePolicy::AllowSelfSigned => warn!("証明書検証ポリシーを「自己署名証明書を許可」に設定しました"),
-            CertificatePolicy::AllowAll => error!("証明書検証ポリシーを「すべて許可（安全でない）」に設定しました"),
+            CertificatePolicy::Default => log::info!("証明書検証ポリシーを「デフォルト」に設定しました"),
+            CertificatePolicy::CertificatePinning(_) => log::info!("証明書検証ポリシーを「証明書ピン留め」に設定しました"),
+            CertificatePolicy::AllowSelfSigned => log::warn!("証明書検証ポリシーを「自己署名証明書を許可」に設定しました"),
+            CertificatePolicy::AllowAll => log::error!("証明書検証ポリシーを「すべて許可（安全でない）」に設定しました"),
         }
         *verifier = CertificateVerifier::new(policy.clone())
             .expect("証明書検証機構の作成に失敗しました");
