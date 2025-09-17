@@ -55,7 +55,7 @@ pub struct RequestConfig {
 }
 
 // Default Condig
-impl Default for RequestCondig {
+impl Default for RequestConfig {
     fn default() -> Self {
         Self {
             timeout_ms: 30000, // 30 seconds
