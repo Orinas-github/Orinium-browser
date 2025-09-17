@@ -5,7 +5,6 @@ use std::time::{Duration, SystemTime};
 use anyhow::{Context, Result};
 use reqwest::{Client, ClientBuilder, Method, StatusCode, Url};
 use tokio::sync::RwLock;
-use mime::Mime;
 
 /* TLS signeture module */
 pub mod sig;
