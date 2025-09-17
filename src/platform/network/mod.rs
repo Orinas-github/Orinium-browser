@@ -10,48 +10,6 @@ use mime::Mime;
 /* TLS signeture module */
 pub mod sig;
 
-#[allow(dead_code)]
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ResourceType {
-    Html,
-    Css,
-    JavaScript,
-    Image,
-    Font,
-    Other,
-}
-
-// resource type detection based on content-type
-impl ResourceType {
-    pub fn from_content_type(content_type: &str) -> Self {
-        match content_type.parse::<Mime>() {
-            Ok(mime) => {
-                match (mime.type_(), mime.subtype()) {
-                    (mime::TEXT, mime::HTML) => ResourceType::Html,
-                    (mime::TEXT, mime::CSS) => ResourceType::Css,
-                    (mime::APPLICATION, mime::JAVASCRIPT) | (mime::TEXT, mime::JAVASCRIPT) => ResourceType::JavaScript,
-                    (mime::IMAGE, _) => ResourceType::Image,
-                    (mime::FONT, _) => ResourceType::Font,
-                    (mime::APPLICATION, subtype) if subtype == "font-woff" || subtype == "font-woff2" => ResourceType::Font,
-                    _ => ResourceType::Other,
-                }
-            }
-            Err(_) => ResourceType::Other,
-        }
-    }
-
-    pub fn from_extension(extension: &str) -> Self {
-        match extension.to_lowercase().as_str() {
-            "html" | "htm" => ResourceType::Html,
-            "css" => ResourceType::Css,
-            "js" => ResourceType::JavaScript,
-            "jpg" | "jpeg" | "png" | "gif" | "webp" | "svg" | "ico" => ResourceType::Image,
-            "ttf" | "otf" | "woff" | "woff2" => ResourceType::Font,
-            _ => ResourceType::Other,
-        }
-    }
-}
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -80,7 +38,6 @@ pub struct Response {
     pub status: StatusCode,
     pub headers: HashMap<String, String>,
     pub body: Vec<u8>,
-    pub resource_type: ResourceType,
     pub url: Url,
 }
 
@@ -155,24 +112,6 @@ impl NetworkCore {
                 headers.insert(name.as_str().to_string(), value_str.to_string());
             }
         }
-        let resource_type = if let Some(content_type) = headers.get("content-type") {
-            ResourceType::from_content_type(content_type)
-        } else {
-            if let Some(path) = url_obj.path_segments() {
-                if let Some(last) = path.last() {
-                    if let Some(dot_pos) = last.rfind('.') {
-                        let extension = &last[dot_pos + 1..];
-                        ResourceType::from_extension(extension)
-                    } else {
-                        ResourceType::Other
-                    }
-                } else {
-                    ResourceType::Other
-                }
-            } else {
-                ResourceType::Other
-            }
-        };
         
         // Read the body
         let body = response
@@ -185,7 +124,6 @@ impl NetworkCore {
             status,
             headers,
             body,
-            resource_type,
             url: url_obj.clone(),
         };
         
@@ -220,11 +158,6 @@ impl NetworkCore {
                 headers.insert(name.as_str().to_string(), value_str.to_string());
             }
         }
-        let resource_type = if let Some(content_type) = headers.get("content-type") {
-            ResourceType::from_content_type(content_type)
-        } else {
-            ResourceType::Other
-        };
 
         let body = response
             .bytes()
@@ -236,7 +169,6 @@ impl NetworkCore {
             status,
             headers,
             body,
-            resource_type,
             url: url_obj,
         })
     }
@@ -298,27 +230,7 @@ impl NetworkCore {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
 
-    #[tokio::test]
-    async fn test_resource_type_detection() {
-        assert_eq!(ResourceType::from_content_type("text/html; charset=utf-8"), ResourceType::Html);
-        assert_eq!(ResourceType::from_content_type("text/css"), ResourceType::Css);
-        assert_eq!(ResourceType::from_content_type("application/javascript"), ResourceType::JavaScript);
-        assert_eq!(ResourceType::from_content_type("image/png"), ResourceType::Image);
-        assert_eq!(ResourceType::from_content_type("font/woff2"), ResourceType::Font);
-        assert_eq!(ResourceType::from_content_type("text/plain"), ResourceType::Other);
-        
-        assert_eq!(ResourceType::from_extension("html"), ResourceType::Html);
-        assert_eq!(ResourceType::from_extension("css"), ResourceType::Css);
-        assert_eq!(ResourceType::from_extension("js"), ResourceType::JavaScript);
-        assert_eq!(ResourceType::from_extension("png"), ResourceType::Image);
-        assert_eq!(ResourceType::from_extension("woff2"), ResourceType::Font);
-        assert_eq!(ResourceType::from_extension("txt"), ResourceType::Other);
-    }
-}
 /*
       ∧,,∧
     (  > ̫ <  ）
