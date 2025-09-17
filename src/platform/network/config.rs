@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 /// ネットワーク層全体の設定
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct NetworkConfig {
     /// User-Agent文字列
@@ -20,7 +21,7 @@ pub struct NetworkConfig {
     pub verify_tls: bool,
 
     /// プロキシ設定
-    pub proxy: Option<ProxyConfig>,
+    pub proxies: Vec<ProxyConfig>,
 
     /// 最大同時接続数
     pub max_connections: usize,
@@ -32,12 +33,28 @@ pub struct NetworkConfig {
     pub enable_websocket: bool,
 }
 
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub enum ProxyType {
+    Http,
+    Https,
+    Socks5,
+}
+
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct ProxyConfig {
+    pub proxy_type: String,
     pub host: String,
     pub port: u16,
     pub username: Option<String>,
     pub password: Option<String>,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Default)]
+pub struct ProxySettings {
+    pub proxies: Vec<ProxyConfig>, // 複数種類を保持できる
 }
 
 
@@ -50,7 +67,7 @@ impl Default for NetworkConfig {
             enable_cache: true,
             enable_cookies: true,
             verify_tls: true,
-            proxy: None,
+            proxies: vec![],
             max_connections: 100,
             follow_redirects: true,
             enable_websocket: true,
