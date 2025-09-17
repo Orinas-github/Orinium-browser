@@ -6,6 +6,7 @@ use anyhow::{Context, Result};
 use reqwest::{Client, ClientBuilder, Method, StatusCode, Url};
 use tokio::sync::RwLock;
 
+pub mod sig;
 mod config;
 use config::NetworkConfig;
 
