@@ -6,30 +6,8 @@ use anyhow::{Context, Result};
 use reqwest::{Client, ClientBuilder, Method, StatusCode, Url};
 use tokio::sync::RwLock;
 
-/* TLS signeture module */
-pub mod sig;
-
-
-#[derive(Debug, Clone)]
-#[allow(dead_code)]
-pub struct RequestConfig {
-    pub timeout_ms: u64,
-    pub follow_redirects: bool,
-    pub max_redirects: u32,
-    pub headers: HashMap<String, String>,
-}
-
-// Default Condig
-impl Default for RequestConfig {
-    fn default() -> Self {
-        Self {
-            timeout_ms: 30000, // 30 seconds
-            follow_redirects: true,
-            max_redirects: 10,
-            headers: HashMap::new(),
-        }
-    }
-}
+mod config;
+use config::NetworkConfig;
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -52,7 +30,7 @@ struct CacheEntry {
 pub struct NetworkCore {
     client: Client,
     cache: Arc<RwLock<HashMap<String, CacheEntry>>>,
-    default_config: RequestConfig,
+    default_config: NetworkConfig,
 }
 
 // NetworkCore implementation
@@ -72,11 +50,11 @@ impl NetworkCore {
         Ok(Self {
             client,
             cache: Arc::new(RwLock::new(HashMap::new())),
-            default_config: RequestConfig::default(),
+            default_config: NetworkConfig::default(),
         })
     }
 
-    pub fn set_default_config(&mut self, config: RequestConfig) {
+    pub fn set_default_config(&mut self, config: NetworkConfig) {
         self.default_config = config;
     }
 
@@ -84,7 +62,7 @@ impl NetworkCore {
         self.fetch_with_config(url, &self.default_config).await
     }
 
-    pub async fn fetch_with_config(&self, url: &str, config: &RequestConfig) -> Result<Response> {
+    pub async fn fetch_with_config(&self, url: &str, config: &NetworkConfig) -> Result<Response> {
         let url_obj = Url::parse(url).context("Invalid URL")?;
         
         if let Some(cached) = self.get_from_cache(&url_obj).await {
@@ -93,10 +71,12 @@ impl NetworkCore {
         }
 
         let mut request_builder = self.client.request(Method::GET, url_obj.clone());
-        request_builder = request_builder.timeout(Duration::from_millis(config.timeout_ms));
+        request_builder = request_builder.timeout(config.connect_timeout + config.read_timeout);
+        /*
         for (name, value) in &config.headers {
             request_builder = request_builder.header(name, value);
         }
+        */
 
         log::info!("Starting to fetch resource: {}", url);
         let response = request_builder
@@ -137,12 +117,14 @@ impl NetworkCore {
         let url_obj = Url::parse(url).context("Invalid URL")?;
         let mut request_builder = self.client
             .request(Method::POST, url_obj.clone())
-            .timeout(Duration::from_millis(self.default_config.timeout_ms))
+            .timeout(self.default_config.connect_timeout + self.default_config.read_timeout)
             .body(body);
         request_builder = request_builder.header("Content-Type", content_type);
+        /*
         for (name, value) in &self.default_config.headers {
             request_builder = request_builder.header(name, value);
         }
+        */
 
         log::info!("Sending POST request: {}", url);
         let response = request_builder
