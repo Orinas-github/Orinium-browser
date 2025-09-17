@@ -47,15 +47,15 @@ impl ResourceType {
 }
 
 #[derive(Debug, Clone)]
-pub struct RequestOptions {
+pub struct RequestConfig {
     pub timeout_ms: u64,
     pub follow_redirects: bool,
     pub max_redirects: u32,
     pub headers: HashMap<String, String>,
 }
 
-// Default options
-impl Default for RequestOptions {
+// Default Condig
+impl Default for RequestCondig {
     fn default() -> Self {
         Self {
             timeout_ms: 30000, // 30 seconds
@@ -86,7 +86,7 @@ struct CacheEntry {
 pub struct NetworkCore {
     client: Client,
     cache: Arc<RwLock<HashMap<String, CacheEntry>>>,
-    default_options: RequestOptions,
+    default_config: RequestConfig,
 }
 
 // NetworkCore implementation
@@ -105,19 +105,19 @@ impl NetworkCore {
         Ok(Self {
             client,
             cache: Arc::new(RwLock::new(HashMap::new())),
-            default_options: RequestOptions::default(),
+            default_config: RequestConfig::default(),
         })
     }
 
-    pub fn set_default_options(&mut self, options: RequestOptions) {
-        self.default_options = options;
+    pub fn set_default_config(&mut self, config: RequestConfig) {
+        self.default_config = config;
     }
 
     pub async fn fetch(&self, url: &str) -> Result<Response> {
-        self.fetch_with_options(url, &self.default_options).await
+        self.fetch_with_config(url, &self.default_config).await
     }
 
-    pub async fn fetch_with_options(&self, url: &str, options: &RequestOptions) -> Result<Response> {
+    pub async fn fetch_with_config(&self, url: &str, config: &RequestConfig) -> Result<Response> {
         let url_obj = Url::parse(url).context("Invalid URL")?;
         
         if let Some(cached) = self.get_from_cache(&url_obj).await {
@@ -126,8 +126,8 @@ impl NetworkCore {
         }
 
         let mut request_builder = self.client.request(Method::GET, url_obj.clone());
-        request_builder = request_builder.timeout(Duration::from_millis(options.timeout_ms));
-        for (name, value) in &options.headers {
+        request_builder = request_builder.timeout(Duration::from_millis(config.timeout_ms));
+        for (name, value) in &config.headers {
             request_builder = request_builder.header(name, value);
         }
 
@@ -189,10 +189,10 @@ impl NetworkCore {
         let url_obj = Url::parse(url).context("Invalid URL")?;
         let mut request_builder = self.client
             .request(Method::POST, url_obj.clone())
-            .timeout(Duration::from_millis(self.default_options.timeout_ms))
+            .timeout(Duration::from_millis(self.default_config.timeout_ms))
             .body(body);
         request_builder = request_builder.header("Content-Type", content_type);
-        for (name, value) in &self.default_options.headers {
+        for (name, value) in &self.default_config.headers {
             request_builder = request_builder.header(name, value);
         }
 
