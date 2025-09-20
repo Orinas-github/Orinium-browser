@@ -1,12 +1,12 @@
 use std::env;
-use std::path::Path;
+// use std::path::Path;
 use anyhow::{Result, Context};
 
 mod platform;
 mod engine;
 use engine::html::parser;
 use platform::network;
-use platform::io;
+// use platform::io;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -17,18 +17,15 @@ async fn main() -> Result<()> {
     let url_or_path = if args.len() > 1 {
         args[1].clone()
     } else {
-        "https://example.com".to_string()
+        "".to_string()
     };
 
     let html = if url_or_path.starts_with("http://") || url_or_path.starts_with("https://") {
         println!("Getting...[{}]", url_or_path);
         let net = network::NetworkCore::new()?;
-        let bytes = net.fetch(&url_or_path).await?.body;
-        String::from_utf8(bytes).context("Warn: Resoulse was'nt encoded by UTF-8")?
-    } else if Path::new(&url_or_path).exists() {
-        println!("loading local file[{}]", url_or_path);
-        let bytes = io::load_local_file(&url_or_path).await?;
-        String::from_utf8(bytes).context("Warn: Resoulse was'nt encoded by UTF-8")?
+        let resp = net.fetch(&url_or_path).await.context("Failed to get URL")?;
+        let body_str = String::from_utf8_lossy(&resp.body).to_string();
+        body_str
     } else {
         let html = r#"<!DOCTYPE html>
 <html lang="ja">

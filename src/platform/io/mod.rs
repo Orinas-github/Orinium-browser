@@ -1,5 +1,6 @@
 use anyhow::Context;
 
+#[allow(dead_code)]
 pub async fn load_local_file(path: &str) -> Result<Vec<u8>, anyhow::Error> {
     use tokio::fs::File;
     use tokio::io::AsyncReadExt;
