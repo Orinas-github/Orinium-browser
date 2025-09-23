@@ -24,6 +24,7 @@ async fn main() -> Result<()> {
         println!("Getting...[{}]", url_or_path);
         let net = network::NetworkCore::new()?;
         let resp = net.fetch(&url_or_path).await.context("Failed to get URL")?;
+        log::info!("Response: {:?}", resp.headers);
         let body_str = String::from_utf8_lossy(&resp.body).to_string();
         body_str
     } else {
