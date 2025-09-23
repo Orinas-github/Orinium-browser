@@ -43,8 +43,8 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse(&mut self) -> NodeRef {
-
         while let Some(token) = self.tokenizer.next_token() {
+            log::debug!("Processing token: {:?}", token);
             match token {
                 Token::StartTag { .. } => self.handle_start_tag(token),
                 Token::EndTag { .. } => self.handle_end_tag(token),
