@@ -29,6 +29,32 @@ pub struct Parser<'a> {
 
 #[allow(dead_code)]
 impl<'a> Parser<'a> {
+        fn print_stack(&self) {
+        println!("--- stack ---");
+        for (i, node_ref) in self.stack.iter().enumerate() {
+            let name = match &node_ref.borrow().node_type {
+                NodeType::Document => "Document".to_string(),
+                NodeType::Element { tag_name, .. } => format!("Element({})", tag_name),
+                NodeType::Text(_) => "Text".to_string(),
+                NodeType::Comment(_) => "Comment".to_string(),
+                NodeType::Doctype { name, .. } => format!("Doctype({:?})", name),
+            };
+            println!("stack[{}]: {}", i, name);
+        }
+        println!("-------------");
+    }
+
+    fn print_dom_root(&self) {
+        let root = &self.stack[0];
+        println!("DOM root: {:?}", match &root.borrow().node_type {
+            NodeType::Document => "Document",
+            NodeType::Element { tag_name, .. } => tag_name.as_str(),
+            NodeType::Text(_) => "Text",
+            NodeType::Comment(_) => "Comment",
+            NodeType::Doctype { .. } => "Doctype",
+        });
+    }
+
     pub fn new(input: &'a str) -> Self {
         let document = Rc::new(RefCell::new(Node {
             node_type: NodeType::Document,
@@ -44,7 +70,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> NodeRef {
         while let Some(token) = self.tokenizer.next_token() {
-            log::debug!("Processing token: {:?}", token);
+            log::info!("Processing token: {:?}", token);
             match token {
                 Token::StartTag { .. } => self.handle_start_tag(token),
                 Token::EndTag { .. } => self.handle_end_tag(token),
@@ -52,7 +78,11 @@ impl<'a> Parser<'a> {
                 Token::Comment(_) => self.handle_comment(token),
                 Token::Text(_) => self.handle_text(token),
             }
+            //print_dom_tree(&self.stack.last().unwrap(), "", true);
+            self.print_stack();
+            self.print_dom_root();
         }
+
 
         Rc::clone(&self.stack[0])
     }
@@ -88,6 +118,19 @@ impl<'a> Parser<'a> {
     fn handle_text(&mut self, token: Token) {
         if let Token::Text(data) = token {
             let parent = Rc::clone(self.stack.last().unwrap());
+            // 親ノードが pre, textarea, script, style でない場合、空白改行を無視する
+            if let Some(parent_node) = &parent.borrow().parent {
+                let parent_node_borrow = parent_node.borrow();
+                if let NodeType::Element { tag_name, .. } = &parent_node_borrow.node_type {
+                    if !matches!(tag_name.as_str(), "pre" | "textarea" | "script" | "style") {
+                        if data.trim().is_empty() {
+                            return;
+                        }
+                    }
+                }
+            } else if data.trim().is_empty() {
+                return;
+            }
             let text_node = Rc::new(RefCell::new(Node {
                 node_type: NodeType::Text(data),
                 children: vec![],
@@ -123,14 +166,21 @@ impl<'a> Parser<'a> {
 
 }
 
-/// DOMTreeを見やすく表示するデバッグ用関数
-/// `prefix` は親からの接続線の情報を渡す
-pub fn print_dom_tree(node: &NodeRef, prefix: &str, is_last: bool) {
+/// 再帰表示用の DOM デバッグ関数（祖先情報付きで罫線を正確に描画）
+pub fn print_dom_tree(node: &NodeRef, ancestors_last: &[bool]) {
     let n = node.borrow();
 
-    // connector を決める
-    let connector = if prefix.is_empty() { "" } else if is_last { "└── " } else { "├── " };
+    // ├── か └── を決める（自身の最後かどうかは ancestors_last の最後で判断）
+    let is_last = *ancestors_last.last().unwrap_or(&true);
+    let connector = if ancestors_last.is_empty() { "" } else if is_last { "└── " } else { "├── " };
 
+    // 現在の prefix を構築
+    let mut prefix = String::new();
+    for &ancestor_last in &ancestors_last[..ancestors_last.len().saturating_sub(1)] {
+        prefix.push_str(if ancestor_last { "    " } else { "│   " });
+    }
+
+    // ノード情報の表示
     match &n.node_type {
         NodeType::Document => println!("{}{}Document", prefix, connector),
         NodeType::Element { tag_name, attributes } => {
@@ -146,7 +196,6 @@ pub fn print_dom_tree(node: &NodeRef, prefix: &str, is_last: bool) {
             println!("{}{}Element: {}{}", prefix, connector, tag_name, attrs_str);
         }
         NodeType::Text(data) => {
-            // 空白や改行だけの Text は簡略化
             let trimmed = data.trim();
             if !trimmed.is_empty() {
                 println!("{}{}Text: {:?}", prefix, connector, trimmed);
@@ -154,21 +203,20 @@ pub fn print_dom_tree(node: &NodeRef, prefix: &str, is_last: bool) {
         }
         NodeType::Comment(data) => println!("{}{}Comment: {:?}", prefix, connector, data),
         NodeType::Doctype { name, public_id, system_id } => {
-            println!("{}{}Doctype: name={:?}, public_id={:?}, system_id={:?}", prefix, connector, name, public_id, system_id);
+            println!("{}{}Doctype: name={:?}, public_id={:?}, system_id={:?}",
+                     prefix, connector, name, public_id, system_id);
         }
     }
 
+    // 子ノードを再帰
     let child_count = n.children.len();
     for (i, child) in n.children.iter().enumerate() {
         let child_is_last = i == child_count - 1;
 
-        // 新しい prefix を作成
-        let new_prefix = if is_last {
-            format!("{}    ", prefix)
-        } else {
-            format!("{}│   ", prefix)
-        };
+        // ancestors_last を更新して渡す
+        let mut new_ancestors = ancestors_last.to_vec();
+        new_ancestors.push(child_is_last);
 
-        print_dom_tree(child, &new_prefix, child_is_last);
+        print_dom_tree(child, &new_ancestors);
     }
 }

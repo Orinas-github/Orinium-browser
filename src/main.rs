@@ -51,9 +51,9 @@ async fn main() -> Result<()> {
         html.to_string()
     };
 
-    println!("Parsing HTML: {}\n", html);
+    log::debug!("Parsing HTML: {}\n", html);
     let mut parser = parser::Parser::new(&html);
     let dom = parser.parse();
-    parser::print_dom_tree(&dom,"" , true);
+    parser::print_dom_tree(&dom, &[]);
     Ok(())
 }
