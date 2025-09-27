@@ -10,7 +10,7 @@ pub struct TcpConnection {
 impl TcpConnection {
     /// TCP接続を作成、指定したタイムアウト時間内に接続できなければエラーを返す
     pub async fn connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
-        let addr = format!("{}:{}", host, port);
+        let addr = format!("{host}:{port}");
         let stream = tokio::time::timeout(timeout, TcpStream::connect(addr)).await??;
         Ok(Self { stream })
     }

@@ -34,12 +34,12 @@ impl<'a> Parser<'a> {
         for (i, node_ref) in self.stack.iter().enumerate() {
             let name = match &node_ref.borrow().node_type {
                 NodeType::Document => "Document".to_string(),
-                NodeType::Element { tag_name, .. } => format!("Element({})", tag_name),
+                NodeType::Element { tag_name, .. } => format!("Element({tag_name})"),
                 NodeType::Text(_) => "Text".to_string(),
                 NodeType::Comment(_) => "Comment".to_string(),
-                NodeType::Doctype { name, .. } => format!("Doctype({:?})", name),
+                NodeType::Doctype { name, .. } => format!("Doctype({name:?})"),
             };
-            println!("stack[{}]: {}", i, name);
+            println!("stack[{i}]: {name}");
         }
         println!("-------------");
     }
@@ -70,7 +70,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> NodeRef {
         while let Some(token) = self.tokenizer.next_token() {
-            log::info!("Processing token: {:?}", token);
+            log::info!("Processing token: {token:?}");
             match token {
                 Token::StartTag { .. } => self.handle_start_tag(token),
                 Token::EndTag { .. } => self.handle_end_tag(token),
@@ -122,11 +122,10 @@ impl<'a> Parser<'a> {
             if let Some(parent_node) = &parent.borrow().parent {
                 let parent_node_borrow = parent_node.borrow();
                 if let NodeType::Element { tag_name, .. } = &parent_node_borrow.node_type {
-                    if !matches!(tag_name.as_str(), "pre" | "textarea" | "script" | "style") {
-                        if data.trim().is_empty() {
+                    if !matches!(tag_name.as_str(), "pre" | "textarea" | "script" | "style")
+                        && data.trim().is_empty() {
                             return;
                         }
-                    }
                 }
             } else if data.trim().is_empty() {
                 return;
@@ -182,7 +181,7 @@ pub fn print_dom_tree(node: &NodeRef, ancestors_last: &[bool]) {
 
     // ノード情報の表示
     match &n.node_type {
-        NodeType::Document => println!("{}{}Document", prefix, connector),
+        NodeType::Document => println!("{prefix}{connector}Document"),
         NodeType::Element { tag_name, attributes } => {
             let attrs_str = if attributes.is_empty() {
                 "".to_string()
@@ -191,20 +190,19 @@ pub fn print_dom_tree(node: &NodeRef, ancestors_last: &[bool]) {
                     .map(|attr| format!("{}=\"{}\"", attr.name, attr.value))
                     .collect::<Vec<_>>()
                     .join(" ");
-                format!(" [{}]", attrs_list)
+                format!(" [{attrs_list}]")
             };
-            println!("{}{}Element: {}{}", prefix, connector, tag_name, attrs_str);
+            println!("{prefix}{connector}Element: {tag_name}{attrs_str}");
         }
         NodeType::Text(data) => {
             let trimmed = data.trim();
             if !trimmed.is_empty() {
-                println!("{}{}Text: {:?}", prefix, connector, trimmed);
+                println!("{prefix}{connector}Text: {trimmed:?}");
             }
         }
-        NodeType::Comment(data) => println!("{}{}Comment: {:?}", prefix, connector, data),
+        NodeType::Comment(data) => println!("{prefix}{connector}Comment: {data:?}"),
         NodeType::Doctype { name, public_id, system_id } => {
-            println!("{}{}Doctype: name={:?}, public_id={:?}, system_id={:?}",
-                     prefix, connector, name, public_id, system_id);
+            println!("{prefix}{connector}Doctype: name={name:?}, public_id={public_id:?}, system_id={system_id:?}");
         }
     }
 

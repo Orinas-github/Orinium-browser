@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     };
 
     let html = if url_or_path.starts_with("http://") || url_or_path.starts_with("https://") {
-        println!("Getting...[{}]", url_or_path);
+        println!("Getting...[{url_or_path}]");
         let net = network::NetworkCore::new()?;
         let resp = net.fetch(&url_or_path).await.context("Failed to get URL")?;
         log::info!("Response: {:?}", resp.headers);
@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
         html.to_string()
     };
 
-    log::debug!("Parsing HTML: {}\n", html);
+    log::debug!("Parsing HTML: {html}\n");
     let mut parser = parser::Parser::new(&html);
     let dom = parser.parse();
     parser::print_dom_tree(&dom, &[]);

@@ -83,10 +83,7 @@ impl ApplicationHandler<State> for App {
                         ..
                     },
                 ..
-            } => match (code, key_state.is_pressed()) {
-                (KeyCode::Escape, true) => event_loop.exit(),
-                _ => {}
-            },
+            } => if let (KeyCode::Escape, true) = (code, key_state.is_pressed()) { event_loop.exit() },
             _ => {}
         }
     }

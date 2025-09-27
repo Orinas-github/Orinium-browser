@@ -107,11 +107,11 @@ impl NetworkCore {
         );
 
         for (k, v) in extra_headers {
-            request.push_str(&format!("{}: {}\r\n", k, v));
+            request.push_str(&format!("{k}: {v}\r\n"));
         }
 
         if let Some(cookie) = cookie_header {
-            request.push_str(&format!("Cookie: {}\r\n", cookie));
+            request.push_str(&format!("Cookie: {cookie}\r\n"));
         }
 
         if let Some(ref b) = body {

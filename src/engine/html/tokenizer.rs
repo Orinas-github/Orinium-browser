@@ -212,7 +212,7 @@ impl<'a> Tokenizer<'a> {
                     text.push('<');
                     text.push(c);
                 } else {
-                    self.current_token = Some(Token::Text(format!("<{}", c)));
+                    self.current_token = Some(Token::Text(format!("<{c}")));
                 }
                 self.state = TokenizerState::Data;
             }
@@ -529,10 +529,8 @@ impl<'a> Tokenizer<'a> {
             TokenizerState::Comment => {
                 if c == '-' {
                     self.state = TokenizerState::CommentEndDash;
-                } else {
-                    if let Some(Token::Comment(ref mut comment)) = self.current_token {
-                        comment.push(c);
-                    }
+                } else if let Some(Token::Comment(ref mut comment)) = self.current_token {
+                    comment.push(c);
                 }
             }
             TokenizerState::CommentEndDash => {
@@ -547,7 +545,7 @@ impl<'a> Tokenizer<'a> {
                         comment.push('-');
                         comment.push(c);
                     } else {
-                        self.current_token = Some(Token::Comment(format!("-{}", c)));
+                        self.current_token = Some(Token::Comment(format!("-{c}")));
                     }
                 }
             }
@@ -564,7 +562,7 @@ impl<'a> Tokenizer<'a> {
                         comment.push_str("--");
                         comment.push(c);
                     } else {
-                        self.current_token = Some(Token::Comment(format!("--{}", c)));
+                        self.current_token = Some(Token::Comment(format!("--{c}")));
                     }
                 }
             }
