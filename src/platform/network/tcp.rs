@@ -1,6 +1,6 @@
-use tokio::net::TcpStream;
-use tokio::io::{AsyncRead, AsyncWrite};
 use std::time::Duration;
+use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::net::TcpStream;
 
 #[derive(Debug)]
 pub struct TcpConnection {
@@ -49,4 +49,3 @@ impl AsyncWrite for TcpConnection {
         std::pin::Pin::new(&mut self.get_mut().stream).poll_shutdown(cx)
     }
 }
-

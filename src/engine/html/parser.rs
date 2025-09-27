@@ -1,15 +1,22 @@
-use std::rc::Rc;
+use crate::engine::html::tokenizer::{Attribute, Token, Tokenizer};
 use std::cell::RefCell;
-use crate::engine::html::tokenizer::{Token, Tokenizer, Attribute};
+use std::rc::Rc;
 
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum NodeType {
     Document,
-    Element { tag_name: String, attributes: Vec<Attribute> },
+    Element {
+        tag_name: String,
+        attributes: Vec<Attribute>,
+    },
     Text(String),
     Comment(String),
-    Doctype { name: Option<String>, public_id: Option<String>, system_id: Option<String> },
+    Doctype {
+        name: Option<String>,
+        public_id: Option<String>,
+        system_id: Option<String>,
+    },
 }
 
 #[allow(dead_code)]
@@ -29,7 +36,7 @@ pub struct Parser<'a> {
 
 #[allow(dead_code)]
 impl<'a> Parser<'a> {
-        fn print_stack(&self) {
+    fn print_stack(&self) {
         println!("--- stack ---");
         for (i, node_ref) in self.stack.iter().enumerate() {
             let name = match &node_ref.borrow().node_type {
@@ -46,13 +53,16 @@ impl<'a> Parser<'a> {
 
     fn print_dom_root(&self) {
         let root = &self.stack[0];
-        println!("DOM root: {:?}", match &root.borrow().node_type {
-            NodeType::Document => "Document",
-            NodeType::Element { tag_name, .. } => tag_name.as_str(),
-            NodeType::Text(_) => "Text",
-            NodeType::Comment(_) => "Comment",
-            NodeType::Doctype { .. } => "Doctype",
-        });
+        println!(
+            "DOM root: {:?}",
+            match &root.borrow().node_type {
+                NodeType::Document => "Document",
+                NodeType::Element { tag_name, .. } => tag_name.as_str(),
+                NodeType::Text(_) => "Text",
+                NodeType::Comment(_) => "Comment",
+                NodeType::Doctype { .. } => "Doctype",
+            }
+        );
     }
 
     pub fn new(input: &'a str) -> Self {
@@ -83,15 +93,22 @@ impl<'a> Parser<'a> {
             self.print_dom_root();
         }
 
-
         Rc::clone(&self.stack[0])
     }
 
     fn handle_start_tag(&mut self, token: Token) {
-        if let Token::StartTag { name, attributes, self_closing } = token {
+        if let Token::StartTag {
+            name,
+            attributes,
+            self_closing,
+        } = token
+        {
             let parent = Rc::clone(self.stack.last().unwrap());
             let new_node = Rc::new(RefCell::new(Node {
-                node_type: NodeType::Element { tag_name: name, attributes },
+                node_type: NodeType::Element {
+                    tag_name: name,
+                    attributes,
+                },
                 children: vec![],
                 parent: Some(Rc::clone(&parent)),
             }));
@@ -109,7 +126,9 @@ impl<'a> Parser<'a> {
         if let Token::EndTag { name } = token {
             while let Some(top) = self.stack.pop() {
                 if let NodeType::Element { tag_name, .. } = &top.borrow().node_type {
-                    if tag_name == &name { break; }
+                    if tag_name == &name {
+                        break;
+                    }
                 }
             }
         }
@@ -123,9 +142,10 @@ impl<'a> Parser<'a> {
                 let parent_node_borrow = parent_node.borrow();
                 if let NodeType::Element { tag_name, .. } = &parent_node_borrow.node_type {
                     if !matches!(tag_name.as_str(), "pre" | "textarea" | "script" | "style")
-                        && data.trim().is_empty() {
-                            return;
-                        }
+                        && data.trim().is_empty()
+                    {
+                        return;
+                    }
                 }
             } else if data.trim().is_empty() {
                 return;
@@ -152,17 +172,26 @@ impl<'a> Parser<'a> {
     }
 
     fn handle_doctype(&mut self, token: Token) {
-        if let Token::Doctype { name, public_id, system_id, ..} = token {
+        if let Token::Doctype {
+            name,
+            public_id,
+            system_id,
+            ..
+        } = token
+        {
             let parent = Rc::clone(self.stack.last().unwrap());
             let doctype_node = Rc::new(RefCell::new(Node {
-                node_type: NodeType::Doctype { name, public_id, system_id },
+                node_type: NodeType::Doctype {
+                    name,
+                    public_id,
+                    system_id,
+                },
                 children: vec![],
                 parent: Some(Rc::clone(&parent)),
             }));
             parent.borrow_mut().children.push(doctype_node);
         }
     }
-
 }
 
 /// 再帰表示用の DOM デバッグ関数（祖先情報付きで罫線を正確に描画）
@@ -171,7 +200,13 @@ pub fn print_dom_tree(node: &NodeRef, ancestors_last: &[bool]) {
 
     // ├── か └── を決める（自身の最後かどうかは ancestors_last の最後で判断）
     let is_last = *ancestors_last.last().unwrap_or(&true);
-    let connector = if ancestors_last.is_empty() { "" } else if is_last { "└── " } else { "├── " };
+    let connector = if ancestors_last.is_empty() {
+        ""
+    } else if is_last {
+        "└── "
+    } else {
+        "├── "
+    };
 
     // 現在の prefix を構築
     let mut prefix = String::new();
@@ -182,11 +217,15 @@ pub fn print_dom_tree(node: &NodeRef, ancestors_last: &[bool]) {
     // ノード情報の表示
     match &n.node_type {
         NodeType::Document => println!("{prefix}{connector}Document"),
-        NodeType::Element { tag_name, attributes } => {
+        NodeType::Element {
+            tag_name,
+            attributes,
+        } => {
             let attrs_str = if attributes.is_empty() {
                 "".to_string()
             } else {
-                let attrs_list = attributes.iter()
+                let attrs_list = attributes
+                    .iter()
                     .map(|attr| format!("{}=\"{}\"", attr.name, attr.value))
                     .collect::<Vec<_>>()
                     .join(" ");
@@ -201,7 +240,11 @@ pub fn print_dom_tree(node: &NodeRef, ancestors_last: &[bool]) {
             }
         }
         NodeType::Comment(data) => println!("{prefix}{connector}Comment: {data:?}"),
-        NodeType::Doctype { name, public_id, system_id } => {
+        NodeType::Doctype {
+            name,
+            public_id,
+            system_id,
+        } => {
             println!("{prefix}{connector}Doctype: name={name:?}, public_id={public_id:?}, system_id={system_id:?}");
         }
     }

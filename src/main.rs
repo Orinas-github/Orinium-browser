@@ -1,9 +1,9 @@
 use std::env;
 // use std::path::Path;
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 
-mod platform;
 mod engine;
+mod platform;
 use engine::html::parser;
 use platform::network;
 // use platform::io;

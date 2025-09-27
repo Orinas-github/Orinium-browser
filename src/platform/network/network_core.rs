@@ -1,16 +1,16 @@
-use tokio::io::{self, AsyncBufReadExt, BufReader, AsyncRead, AsyncReadExt, AsyncWriteExt};
+use anyhow::Result;
 use std::sync::Arc;
 use std::time::SystemTime;
+use tokio::io::{self, AsyncBufReadExt, AsyncRead, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::sync::RwLock;
 use url::Url;
-use anyhow::Result;
 
 use crate::platform::network::{
-    config::NetworkConfig,
-    connection_pool::{ConnectionPool, Connection, HostKey},
-    tcp::TcpConnection,
-    cookie_store::CookieStore,
     cache::Cache,
+    config::NetworkConfig,
+    connection_pool::{Connection, ConnectionPool, HostKey},
+    cookie_store::CookieStore,
+    tcp::TcpConnection,
 };
 
 #[allow(dead_code)]
@@ -60,7 +60,10 @@ impl NetworkCore {
         body: Option<Vec<u8>>,
         use_cache: bool,
     ) -> Result<Response> {
-        let host = url.host_str().ok_or_else(|| anyhow::anyhow!("Invalid host"))?.to_string();
+        let host = url
+            .host_str()
+            .ok_or_else(|| anyhow::anyhow!("Invalid host"))?
+            .to_string();
         let port = url.port_or_known_default().unwrap_or(80);
         let key = HostKey {
             scheme: url.scheme().to_string(),
@@ -153,11 +156,7 @@ impl NetworkCore {
             .nth(1)
             .and_then(|s| s.parse::<u16>().ok())
             .unwrap_or(200);
-        let reason_phrase = status_line
-            .splitn(3, ' ')
-            .nth(2)
-            .unwrap_or("")
-            .to_string();
+        let reason_phrase = status_line.splitn(3, ' ').nth(2).unwrap_or("").to_string();
 
         // Cookie 保存
         let set_cookie_headers = headers
@@ -165,7 +164,9 @@ impl NetworkCore {
             .filter(|(k, _)| k.to_lowercase() == "set-cookie")
             .map(|(_, v)| v.clone())
             .collect::<Vec<_>>();
-        self.cookie_store.set_cookies(url, &set_cookie_headers).await;
+        self.cookie_store
+            .set_cookies(url, &set_cookie_headers)
+            .await;
 
         // Cache 保存（GETのみ）
         if use_cache {
@@ -191,15 +192,11 @@ impl NetworkCore {
     }
 
     /// POST（キャッシュなし）
-    pub async fn post(
-        &self,
-        url: &str,
-        body: Vec<u8>,
-        content_type: &str,
-    ) -> Result<Response> {
+    pub async fn post(&self, url: &str, body: Vec<u8>, content_type: &str) -> Result<Response> {
         let url = Url::parse(url)?;
         let headers = vec![("Content-Type".to_string(), content_type.to_string())];
-        self.send_request("POST", &url, headers, Some(body), false).await
+        self.send_request("POST", &url, headers, Some(body), false)
+            .await
     }
 
     async fn read_headers<R>(stream: &mut R) -> io::Result<(Vec<u8>, Vec<(String, String)>)>

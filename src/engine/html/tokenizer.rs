@@ -94,7 +94,6 @@ impl TokenizerState {
     }
 }
 
-
 impl<'a> Tokenizer<'a> {
     pub fn new(input: &'a str) -> Self {
         Tokenizer {
@@ -123,7 +122,10 @@ impl<'a> Tokenizer<'a> {
                 TokenizerState::BeforeAttributeName => self.state_before_attribute_name(c),
                 TokenizerState::AttributeName => self.state_attribute_name(c),
                 TokenizerState::BeforeAttributeValue => self.state_before_attribute_value(c),
-                TokenizerState::AttributeValueDoubleQuoted | TokenizerState::AttributeValueSingleQuoted => self.state_attribute_value_quoted(c),
+                TokenizerState::AttributeValueDoubleQuoted
+                | TokenizerState::AttributeValueSingleQuoted => {
+                    self.state_attribute_value_quoted(c)
+                }
                 TokenizerState::AfterAttributeName => self.state_after_attribute_name(c),
                 TokenizerState::AttributeValueUnquoted => self.state_attribute_value_unquoted(c),
                 TokenizerState::SelfClosingStartTag => self.state_self_closing_start_tag(c),
@@ -142,9 +144,9 @@ impl<'a> Tokenizer<'a> {
 
         // BogusComment処理
         if self.state.is_comment() {
-                self.state = TokenizerState::BogusComment;
-                self.commit_token();
-                return self.token.take();
+            self.state = TokenizerState::BogusComment;
+            self.commit_token();
+            return self.token.take();
         }
 
         None
@@ -160,7 +162,7 @@ impl<'a> Tokenizer<'a> {
             '<' => {
                 self.commit_token();
                 self.state = TokenizerState::TagOpen
-            },
+            }
             '&' => {
                 todo!(); // エスケープ処理 (未実装)
             }
@@ -195,7 +197,8 @@ impl<'a> Tokenizer<'a> {
                     self.state = TokenizerState::BogusComment;
                 }
             }
-            c if c.is_ascii_alphabetic() => { // cがアルファベットの場合
+            c if c.is_ascii_alphabetic() => {
+                // cがアルファベットの場合
                 self.state = TokenizerState::TagName;
                 self.buffer.push(c);
                 self.current_token = Some(Token::StartTag {
@@ -235,7 +238,8 @@ impl<'a> Tokenizer<'a> {
                     name.push(c);
                 }
             }
-            _ => {// 不正な文字
+            _ => {
+                // 不正な文字
                 // タグの終了として処理
                 self.commit_token();
                 self.state = TokenizerState::Data;
@@ -245,25 +249,29 @@ impl<'a> Tokenizer<'a> {
 
     fn state_doctype(&mut self, c: char) {
         match c {
-            c if c.is_whitespace() => {
-                match self.state {
-                    TokenizerState::Doctype => self.state = TokenizerState::DoctypeName,
-                    TokenizerState::DoctypeName => {
-                        if self.input[self.pos..].to_lowercase().starts_with("public") {
-                            self.pos += 6;
-                            self.state = TokenizerState::BeforeDoctypePublicId
-                        } else if self.input[self.pos..].to_lowercase().starts_with("system") {
-                            self.pos += 6;
-                            self.state = TokenizerState::BeforeDoctypePublicId
-                        }
-                    },
-                    TokenizerState::AfterDoctypePublicId => self.state = TokenizerState::DoctypeSystemId,
-                    _ => {}
+            c if c.is_whitespace() => match self.state {
+                TokenizerState::Doctype => self.state = TokenizerState::DoctypeName,
+                TokenizerState::DoctypeName => {
+                    if self.input[self.pos..].to_lowercase().starts_with("public") {
+                        self.pos += 6;
+                        self.state = TokenizerState::BeforeDoctypePublicId
+                    } else if self.input[self.pos..].to_lowercase().starts_with("system") {
+                        self.pos += 6;
+                        self.state = TokenizerState::BeforeDoctypePublicId
+                    }
                 }
-            }
+                TokenizerState::AfterDoctypePublicId => {
+                    self.state = TokenizerState::DoctypeSystemId
+                }
+                _ => {}
+            },
             '>' => {
                 if self.state == TokenizerState::BogusDoctype {
-                    if let Some(Token::Doctype { ref mut force_quirks, .. }) = self.current_token {
+                    if let Some(Token::Doctype {
+                        ref mut force_quirks,
+                        ..
+                    }) = self.current_token
+                    {
                         *force_quirks = true;
                     }
                 }
@@ -275,7 +283,7 @@ impl<'a> Tokenizer<'a> {
                 match self.state {
                     TokenizerState::Doctype => {
                         self.state = TokenizerState::BogusDoctype;
-                    },
+                    }
                     TokenizerState::DoctypeName => {
                         if let Some(Token::Doctype { ref mut name, .. }) = self.current_token {
                             if name.is_none() {
@@ -284,41 +292,54 @@ impl<'a> Tokenizer<'a> {
                                 n.push(c);
                             }
                         }
-                    },
+                    }
                     TokenizerState::BeforeDoctypePublicId => {
                         match c {
                             '"' => self.state = TokenizerState::DoctypePublicIdWithDoubleQuote,
                             '\'' => self.state = TokenizerState::DoctypePublicIdWithSingleQuote,
-                            _ if c.is_whitespace() => {}, // 無視
+                            _ if c.is_whitespace() => {} // 無視
                             _ => {
                                 // 不正な文字
                                 self.state = TokenizerState::BogusDoctype;
                             }
                         }
-                        if let Some(Token::Doctype { ref mut public_id, .. }) = self.current_token {
+                        if let Some(Token::Doctype {
+                            ref mut public_id, ..
+                        }) = self.current_token
+                        {
                             *public_id = Some(c.to_string());
                         }
-                    },
-                    TokenizerState::DoctypePublicIdWithSingleQuote | TokenizerState::DoctypePublicIdWithDoubleQuote => {
-                        if let Some(Token::Doctype { ref mut public_id, .. }) = self.current_token {
+                    }
+                    TokenizerState::DoctypePublicIdWithSingleQuote
+                    | TokenizerState::DoctypePublicIdWithDoubleQuote => {
+                        if let Some(Token::Doctype {
+                            ref mut public_id, ..
+                        }) = self.current_token
+                        {
                             if let Some(ref mut pid) = public_id {
                                 pid.push(c);
                             }
                         }
-                        if (self.state == TokenizerState::DoctypePublicIdWithSingleQuote && c == '\'') ||
-                           (self.state == TokenizerState::DoctypePublicIdWithDoubleQuote && c == '"') {
+                        if (self.state == TokenizerState::DoctypePublicIdWithSingleQuote
+                            && c == '\'')
+                            || (self.state == TokenizerState::DoctypePublicIdWithDoubleQuote
+                                && c == '"')
+                        {
                             self.state = TokenizerState::AfterDoctypePublicId;
                         }
-                    },
+                    }
                     TokenizerState::DoctypeSystemId => {
-                        if let Some(Token::Doctype { ref mut system_id, .. }) = self.current_token {
+                        if let Some(Token::Doctype {
+                            ref mut system_id, ..
+                        }) = self.current_token
+                        {
                             if system_id.is_none() {
                                 *system_id = Some(c.to_string());
                             } else if let Some(ref mut sid) = system_id {
                                 sid.push(c);
                             }
                         }
-                    },
+                    }
                     _ => {}
                 }
             }
@@ -342,7 +363,7 @@ impl<'a> Tokenizer<'a> {
                 });
             }
             _ => { // 不正な文字
-                // 壊れたトークンは無視
+                 // 壊れたトークンは無視
             }
         }
     }
@@ -353,7 +374,10 @@ impl<'a> Tokenizer<'a> {
             '=' => self.state = TokenizerState::BeforeAttributeValue,
             '/' => {
                 if let Some(attr) = self.current_attribute.take() {
-                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                    if let Some(Token::StartTag {
+                        ref mut attributes, ..
+                    }) = self.current_token
+                    {
                         attributes.push(attr);
                     }
                 }
@@ -361,7 +385,10 @@ impl<'a> Tokenizer<'a> {
             }
             '>' => {
                 if let Some(attr) = self.current_attribute.take() {
-                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                    if let Some(Token::StartTag {
+                        ref mut attributes, ..
+                    }) = self.current_token
+                    {
                         attributes.push(attr);
                     }
                 }
@@ -375,7 +402,7 @@ impl<'a> Tokenizer<'a> {
                 }
             }
             _ => { // 不正な文字
-                // 壊れたトークンは無視
+                 // 壊れたトークンは無視
             }
         }
     }
@@ -388,7 +415,10 @@ impl<'a> Tokenizer<'a> {
             '>' => {
                 // 属性値がない場合は空文字列として扱う
                 if let Some(attr) = self.current_attribute.take() {
-                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                    if let Some(Token::StartTag {
+                        ref mut attributes, ..
+                    }) = self.current_token
+                    {
                         attributes.push(attr);
                     }
                 }
@@ -409,7 +439,10 @@ impl<'a> Tokenizer<'a> {
         match c {
             '"' if self.state == TokenizerState::AttributeValueDoubleQuoted => {
                 if let Some(attr) = self.current_attribute.take() {
-                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                    if let Some(Token::StartTag {
+                        ref mut attributes, ..
+                    }) = self.current_token
+                    {
                         attributes.push(attr);
                     }
                 }
@@ -417,7 +450,10 @@ impl<'a> Tokenizer<'a> {
             }
             '\'' if self.state == TokenizerState::AttributeValueSingleQuoted => {
                 if let Some(attr) = self.current_attribute.take() {
-                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                    if let Some(Token::StartTag {
+                        ref mut attributes, ..
+                    }) = self.current_token
+                    {
                         attributes.push(attr);
                     }
                 }
@@ -448,7 +484,7 @@ impl<'a> Tokenizer<'a> {
                 });
             }
             _ => { // 不正な文字
-                // 壊れたトークンは無視
+                 // 壊れたトークンは無視
             }
         }
     }
@@ -457,7 +493,10 @@ impl<'a> Tokenizer<'a> {
         match c {
             c if c.is_whitespace() => {
                 if let Some(attr) = self.current_attribute.take() {
-                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                    if let Some(Token::StartTag {
+                        ref mut attributes, ..
+                    }) = self.current_token
+                    {
                         attributes.push(attr);
                     }
                 }
@@ -465,7 +504,10 @@ impl<'a> Tokenizer<'a> {
             }
             '>' => {
                 if let Some(attr) = self.current_attribute.take() {
-                    if let Some(Token::StartTag { ref mut attributes, .. }) = self.current_token {
+                    if let Some(Token::StartTag {
+                        ref mut attributes, ..
+                    }) = self.current_token
+                    {
                         attributes.push(attr);
                     }
                 }
@@ -483,7 +525,11 @@ impl<'a> Tokenizer<'a> {
     fn state_self_closing_start_tag(&mut self, c: char) {
         match c {
             '>' => {
-                if let Some(Token::StartTag { ref mut self_closing, .. }) = self.current_token {
+                if let Some(Token::StartTag {
+                    ref mut self_closing,
+                    ..
+                }) = self.current_token
+                {
                     *self_closing = true;
                 }
                 self.commit_token();

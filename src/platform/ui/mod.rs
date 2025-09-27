@@ -17,17 +17,15 @@ pub struct App {
     state: Option<State>,
 }
 
-impl State{
+impl State {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<Self> {
-        Ok(Self {
-            window,
-        })
+        Ok(Self { window })
     }
-    
+
     pub fn resize(&mut self, _width: u32, _height: u32) {
         // これから実装
     }
-    
+
     pub fn render(&mut self) {
         self.window.request_redraw();
     }
@@ -36,9 +34,7 @@ impl State{
 #[allow(dead_code)]
 impl App {
     pub fn new() -> Self {
-        Self {
-            state: None,
-        }
+        Self { state: None }
     }
 }
 
@@ -50,7 +46,6 @@ impl ApplicationHandler<State> for App {
         let window = Arc::new(event_loop.create_window(window_attributes).unwrap());
 
         self.state = Some(pollster::block_on(State::new(window)).unwrap());
-
     }
 
     #[allow(unused_mut)]
@@ -83,7 +78,11 @@ impl ApplicationHandler<State> for App {
                         ..
                     },
                 ..
-            } => if let (KeyCode::Escape, true) = (code, key_state.is_pressed()) { event_loop.exit() },
+            } => {
+                if let (KeyCode::Escape, true) = (code, key_state.is_pressed()) {
+                    event_loop.exit()
+                }
+            }
             _ => {}
         }
     }
