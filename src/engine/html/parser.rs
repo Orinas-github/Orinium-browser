@@ -80,7 +80,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> NodeRef {
         while let Some(token) = self.tokenizer.next_token() {
-            log::info!("Processing token: {token:?}");
+            //log::info!("Processing token: {token:?}");
             match token {
                 Token::StartTag { .. } => self.handle_start_tag(token),
                 Token::EndTag { .. } => self.handle_end_tag(token),
@@ -89,8 +89,8 @@ impl<'a> Parser<'a> {
                 Token::Text(_) => self.handle_text(token),
             }
             //print_dom_tree(&self.stack.last().unwrap(), "", true);
-            self.print_stack();
-            self.print_dom_root();
+            //self.print_stack();
+            //self.print_dom_root();
         }
 
         Rc::clone(&self.stack[0])
