@@ -1,11 +1,11 @@
-use anyhow::{Result};
+use anyhow::Result;
 use orinium_browser::engine::html::parser;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::init();
 
-        let html = r#"<!DOCTYPE html>
+    let html = r#"<!DOCTYPE html>
 <html lang="ja">
 <head>
     <title>Orinium Browser DOM Test</title>
