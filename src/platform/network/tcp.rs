@@ -8,8 +8,17 @@ pub struct TcpConnection {
 }
 
 impl TcpConnection {
-    /// TCP接続を作成、指定したタイムアウト時間内に接続できなければエラーを返す
-    pub async fn connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
+    /// TCP接続を作成します。
+    ///
+    /// # 引数
+    /// * `host` - 接続先のホスト名またはIPアドレス
+    /// * `port` - 接続先のポート番号
+    /// * `timeout` - 接続タイムアウト時間
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`TcpConnection`のインスタンスを返します
+    /// * タイムアウトまたは接続エラーの場合は`anyhow::Error`を返します
+    pub async fn Connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
         let addr = format!("{host}:{port}");
         let stream = tokio::time::timeout(timeout, TcpStream::connect(addr)).await??;
         Ok(Self { stream })

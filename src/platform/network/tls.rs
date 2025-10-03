@@ -1,40 +1,53 @@
 use std::sync::Arc;
+use std::time::Duration;
+
 use tokio::io::{AsyncRead, AsyncWrite};
+use tokio_rustls::client::TlsStream;
+use tokio_rustls::TlsConnector;
 use rustls::ClientConfig;
 use rustls::pki_types::ServerName;
 use rustls_native_certs::load_native_certs;
-use tokio_rustls::client::TlsStream;
-use tokio_rustls::TlsConnector;
-use std::time::Duration;
 
 use crate::platform::network::tcp::TcpConnection;
 
+/// TLS接続を管理するための構造体
 #[derive(Debug)]
 pub struct TlsConnection {
+    /// 内部のTLS暗号化されたストリーム
     pub stream: TlsStream<TcpConnection>,
 }
 
 impl TlsConnection {
-    /// TLS接続を作成、指定したタイムアウト時間内に接続できなければエラーを返す
-    pub async fn connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
-        // TCP接続を確立
-        let tcp_conn = TcpConnection::connect(host, port, timeout).await?;
+    /// TLS接続を作成します。
+    ///
+    /// # 引数
+    /// * `host` - 接続先のホスト名（証明書検証に使用）
+    /// * `port` - 接続先のポート番号
+    /// * `timeout` - 接続タイムアウト時間
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`TlsConnection`のインスタンスを返します
+    /// * 証明書検証失敗、タイムアウト、または接続エラーの場合は`anyhow::Error`を返します
+    ///
+    /// # エラー
+    /// * ホスト名が無効な場合
+    /// * 証明書検証に失敗した場合
+    /// * 接続がタイムアウトした場合
+    /// * 下層のTCP接続に失敗した場合
+    pub async fn Connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
+        let tcp_conn = TcpConnection::Connect(host, port, timeout).await?;
 
-        // 証明書ストアから証明書を読み込む
         let mut roots = rustls::RootCertStore::empty();
         for cert in load_native_certs()? {
             roots.add(cert)?;
         }
 
-        // TLS設定
         let config = ClientConfig::builder()
             .with_root_certificates(roots)
             .with_no_client_auth();
 
-        // TLSコネクタを作成
         let connector = TlsConnector::from(Arc::new(config));
 
-        // ホスト名をDNS名に変換
         let server_name = ServerName::try_from(host.to_string())
             .map_err(|_| anyhow::anyhow!("Invalid DNS name: {}", host))?;
 
