@@ -3,29 +3,6 @@
 version = 4
 
 [[package]]
-name = "Orinium_Browser"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64",
- "env_logger",
- "futures",
- "http",
- "log",
- "pollster",
- "rustls-native-certs",
- "sha2",
- "tokio",
- "twoway",
- "url",
- "webpki",
- "webpki-roots 0.26.11",
- "wgpu",
- "winit",
- "x509-parser",
-]
-
-[[package]]
 name = "ab_glyph"
 version = "0.2.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1657,6 +1634,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2c1f9f56e534ac6a9b8a4600bdf0f530fb393b5f393e7b4d03489c3cf0c3f01"
 dependencies = [
  "num-traits",
+]
+
+[[package]]
+name = "orinium_browser"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64",
+ "env_logger",
+ "futures",
+ "http",
+ "log",
+ "pollster",
+ "rustls-native-certs",
+ "sha2",
+ "tokio",
+ "twoway",
+ "url",
+ "webpki",
+ "webpki-roots 0.26.11",
+ "wgpu",
+ "winit",
+ "x509-parser",
 ]
 
 [[package]]
