@@ -1,12 +1,12 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use rustls::pki_types::ServerName;
+use rustls::ClientConfig;
+use rustls_native_certs::load_native_certs;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_rustls::client::TlsStream;
 use tokio_rustls::TlsConnector;
-use rustls::ClientConfig;
-use rustls::pki_types::ServerName;
-use rustls_native_certs::load_native_certs;
 
 use crate::platform::network::tcp::TcpConnection;
 
@@ -51,10 +51,8 @@ impl TlsConnection {
         let server_name = ServerName::try_from(host.to_string())
             .map_err(|_| anyhow::anyhow!("Invalid DNS name: {}", host))?;
 
-        let stream = tokio::time::timeout(
-            timeout,
-            connector.connect(server_name, tcp_conn)
-        ).await??;
+        let stream =
+            tokio::time::timeout(timeout, connector.connect(server_name, tcp_conn)).await??;
 
         Ok(Self { stream })
     }
