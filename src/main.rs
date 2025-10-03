@@ -1,7 +1,6 @@
 use std::env;
 use anyhow::{Result, Context};
 
-// クレートからモジュールを正しくインポート
 use orinium_browser::{parser, network};
 
 #[tokio::main]

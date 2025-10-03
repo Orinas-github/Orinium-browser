@@ -8,7 +8,6 @@ pub mod engine;
 /// ファイルI/Oなどプラットフォーム固有の実装が含まれます。
 pub mod platform;
 
-// 便利な再エクスポート
 pub use engine::html;
 pub use platform::network;
-pub use engine::html::parser; // parser モジュールを直接再エクスポート
+pub use engine::html::parser;
