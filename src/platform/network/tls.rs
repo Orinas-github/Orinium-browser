@@ -34,8 +34,8 @@ impl TlsConnection {
     /// * 証明書検証に失敗した場合
     /// * 接続がタイムアウトした場合
     /// * 下層のTCP接続に失敗した場合
-    pub async fn Connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
-        let tcp_conn = TcpConnection::Connect(host, port, timeout).await?;
+    pub async fn connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
+        let tcp_conn = TcpConnection::connect(host, port, timeout).await?;
 
         let mut roots = rustls::RootCertStore::empty();
         for cert in load_native_certs()? {
@@ -60,6 +60,8 @@ impl TlsConnection {
     }
 }
 
+/// `AsyncRead`トレイトの実装により、TlsConnectionから非同期的にデータを読み取る機能を提供します。
+/// この実装はTLS暗号化されたデータを透過的に復号化して読み取ります。
 impl AsyncRead for TlsConnection {
     fn poll_read(
         self: std::pin::Pin<&mut Self>,
@@ -70,6 +72,8 @@ impl AsyncRead for TlsConnection {
     }
 }
 
+/// `AsyncWrite`トレイトの実装により、TlsConnectionに非同期的にデータを書き込む機能を提供します。
+/// この実装はデータを透過的に暗号化してTLSストリームに書き込みます。
 impl AsyncWrite for TlsConnection {
     fn poll_write(
         self: std::pin::Pin<&mut Self>,

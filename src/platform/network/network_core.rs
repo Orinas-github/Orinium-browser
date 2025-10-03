@@ -13,34 +13,60 @@ use crate::platform::network::{
     tcp::TcpConnection,
 };
 
+/// HTTPレスポンスを表す構造体
+///
+/// サーバーからのHTTPレスポンスの詳細情報を格納します。
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Response {
+    /// HTTPバージョン (例: "HTTP/1.1")
     pub http_version: String,
+    /// HTTPステータスコード (例: 200, 404)
     pub status_code: u16,
+    /// ステータスコードに対応する説明文 (例: "OK", "Not Found")
     pub reason_phrase: String,
+    /// HTTPヘッダーのキーと値のペアのリスト
     pub headers: Vec<(String, String)>,
+    /// レスポンスボディのバイナリデータ
     pub body: Vec<u8>,
 }
 
+/// キャッシュに保存されるレスポンスエントリを表す構造体
 #[derive(Debug)]
 #[allow(dead_code)]
 struct CacheEntry {
+    /// キャッシュされたレスポンスデータ
     response: Response,
+    /// キャッシュが作成された時刻
     cached_at: SystemTime,
+    /// キャッシュの有効期限（Noneの場合は期限なし）
     expires_at: Option<SystemTime>,
 }
 
+/// ネットワーク通信の中核機能を提供する構造体
+///
+/// HTTP/HTTPS通信、キャッシュ管理、Cookie管理、接続プールなどの機能を統合します。
 #[derive(Debug)]
 pub struct NetworkCore {
+    /// ネットワーク設定情報
     pub config: Arc<RwLock<NetworkConfig>>,
+    /// コネクションプール（接続を再利用するため）
     pub connection_pool: ConnectionPool,
+    /// Cookieストア（サイト間でCookieを管理）
     pub cookie_store: CookieStore,
+    /// レスポンスキャッシュ
     pub cache: Cache,
 }
 
 #[allow(dead_code)]
 impl NetworkCore {
+    /// 新しいNetworkCoreインスタンスを作成します
+    ///
+    /// デフォルト設定でネットワークコアを初期化します。
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`NetworkCore`のインスタンスを返します
+    /// * 初期化に失敗した場合は`anyhow::Error`を返します
     pub fn new() -> Result<Self> {
         let config = NetworkConfig::default();
         Ok(Self {
@@ -52,6 +78,20 @@ impl NetworkCore {
     }
 
     /// 汎用 HTTP リクエスト関数
+    ///
+    /// 指定されたURLにHTTPリクエストを送信し、レスポンスを取得します。
+    /// この関数はGET、POST、その他のHTTPメソッドでの通信を処理します。
+    ///
+    /// # 引数
+    /// * `method` - HTTPメソッド（例: "GET", "POST"）
+    /// * `url` - 接続先URL
+    /// * `extra_headers` - 追加のHTTPヘッダー
+    /// * `body` - リクエストボディ（省略可能）
+    /// * `use_cache` - キャッシュを使用するかどうか
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`Response`を返します
+    /// * 接続エラーなどの場合は`anyhow::Error`を返します
     async fn send_request(
         &self,
         method: &str,
@@ -199,13 +239,35 @@ impl NetworkCore {
         })
     }
 
-    /// GET（キャッシュあり）
+    /// GET要求を送信し、結果を取得します（キャッシュを使用）
+    ///
+    /// 指定されたURLにGETリクエストを送信し、レスポンスを返します。
+    /// キャッシュが有効な場合は、キャッシュからレスポンスが返される場合があります。
+    ///
+    /// # 引数
+    /// * `url` - 取得するURL（文字列）
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`Response`を返します
+    /// * URL解析エラーや接続エラーなどの場合は`anyhow::Error`を返します
     pub async fn fetch(&self, url: &str) -> Result<Response> {
         let url = Url::parse(url)?;
         self.send_request("GET", &url, vec![], None, true).await
     }
 
-    /// POST（キャッシュなし）
+    /// POSTリクエストを送信します（キャッシュなし）
+    ///
+    /// 指定されたURLにPOSTリクエストを送信し、レスポンスを返します。
+    /// POSTリクエストはキャッシュを使用しません。
+    ///
+    /// # 引数
+    /// * `url` - 送信先URL（文字列）
+    /// * `body` - POSTリクエストのボディデータ
+    /// * `content_type` - コンテンツタイプ（例: "application/json"）
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`Response`を返します
+    /// * URL解析エラーや接続エラーなどの場合は`anyhow::Error`を返します
     pub async fn post(&self, url: &str, body: Vec<u8>, content_type: &str) -> Result<Response> {
         let url = Url::parse(url)?;
         let headers = vec![("Content-Type".to_string(), content_type.to_string())];
@@ -213,6 +275,17 @@ impl NetworkCore {
             .await
     }
 
+    /// HTTPヘッダーを読み取ります
+    ///
+    /// 指定されたストリームからHTTPレスポンスヘッダーを読み取ります。
+    /// HTTPヘッダーの終端（空行）まで読み取り、ヘッダー情報とボディの先頭部分を返します。
+    ///
+    /// # 引数
+    /// * `stream` - 読み取り元のストリーム（AsyncRead + Unpin）
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`(Vec<u8>, Vec<(String, String)>)`を返します（ボディの先頭部分とヘッダーのペア）
+    /// * 読み取りエラーの場合は`io::Error`を返します
     async fn read_headers<R>(stream: &mut R) -> io::Result<(Vec<u8>, Vec<(String, String)>)>
     where
         R: AsyncRead + Unpin,
@@ -238,6 +311,19 @@ impl NetworkCore {
         Ok((body_start, headers))
     }
 
+    /// HTTPレスポンスボディを読み取ります
+    ///
+    /// 指定されたストリームからHTTPレスポンスボディを読み取ります。
+    /// Content-Lengthヘッダーに基づいて、適切な量のデータを読み取ります。
+    ///
+    /// # 引数
+    /// * `stream` - 読み取り元のストリーム（AsyncRead + Unpin）
+    /// * `body_start` - すでに読み取られたボディの先頭部分
+    /// * `content_length` - 読み取るべきボディの合計サイズ
+    ///
+    /// # 戻り値
+    /// * 成功した場合は`Vec<u8>`としてボディデータを返します
+    /// * 読み取りエラーの場合は`anyhow::Error`を返します
     async fn read_body<R>(
         stream: &mut R,
         body_start: Vec<u8>,

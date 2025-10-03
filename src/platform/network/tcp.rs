@@ -2,8 +2,12 @@ use std::time::Duration;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::TcpStream;
 
+/// TCP接続を管理する構造体
+///
+/// この構造体は基本的なTCP接続とデータ送受信機能を提供します。
 #[derive(Debug)]
 pub struct TcpConnection {
+    /// 内部のTCPストリーム
     pub stream: TcpStream,
 }
 
@@ -18,13 +22,14 @@ impl TcpConnection {
     /// # 戻り値
     /// * 成功した場合は`TcpConnection`のインスタンスを返します
     /// * タイムアウトまたは接続エラーの場合は`anyhow::Error`を返します
-    pub async fn Connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
+    pub async fn connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
         let addr = format!("{host}:{port}");
         let stream = tokio::time::timeout(timeout, TcpStream::connect(addr)).await??;
         Ok(Self { stream })
     }
 }
 
+/// `AsyncRead`トレイトの実装により、TcpConnectionから非同期的にデータを読み取る機能を提供します。
 impl AsyncRead for TcpConnection {
     fn poll_read(
         self: std::pin::Pin<&mut Self>,
@@ -35,6 +40,7 @@ impl AsyncRead for TcpConnection {
     }
 }
 
+/// `AsyncWrite`トレイトの実装により、TcpConnectionに非同期的にデータを書き込む機能を提供します。
 impl AsyncWrite for TcpConnection {
     fn poll_write(
         self: std::pin::Pin<&mut Self>,
