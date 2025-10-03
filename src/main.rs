@@ -1,8 +1,5 @@
 use std::env;
-// use std::path::Path;
-use anyhow::{Context, Result};
-
-// use platform::io;
+use anyhow::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
