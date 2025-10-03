@@ -1,12 +1,8 @@
 use std::env;
-// use std::path::Path;
 use anyhow::{Result, Context};
 
-mod platform;
-mod engine;
-use engine::html::parser;
-use platform::network;
-// use platform::io;
+// クレートからモジュールを正しくインポート
+use orinium_browser::{parser, network};
 
 #[tokio::main]
 async fn main() -> Result<()> {
