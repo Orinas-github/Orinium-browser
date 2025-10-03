@@ -1,10 +1,10 @@
 # TODO
 
 ## 実装
-- [] Render pipelineの実装
+- [ ] Render pipelineの実装
 
 ## 機能追加
-- [] TLS通信
+- [ ] TLS通信
 
 ## バグ修正
 - [ ] DOM生成時にDOM末尾に使われないデータが含まれている可能性があるバグを調査・修正
