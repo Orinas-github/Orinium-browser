@@ -90,7 +90,7 @@ impl NetworkCore {
             None => {
                 let cfg = self.config.read().await;
                 if url.scheme() == "https" {
-                    anyhow::bail!("TLS not supported yet");
+                    Connection::Tls(crate::platform::network::tls::TlsConnection::connect(&host, port, cfg.connect_timeout).await?)
                 } else {
                     Connection::Tcp(TcpConnection::connect(&host, port, cfg.connect_timeout).await?)
                 }
@@ -125,6 +125,20 @@ impl NetworkCore {
         // 送信 & レスポンス受信
         let (headers, body) = match &mut conn {
             Connection::Tcp(c) => {
+                c.stream.write_all(request.as_bytes()).await?;
+                if let Some(body_bytes) = body.clone() {
+                    c.stream.write_all(&body_bytes).await?;
+                }
+                let (body_start, headers) = Self::read_headers(&mut c.stream).await?;
+                let content_length = headers
+                    .iter()
+                    .find(|(k, _)| k.to_lowercase() == "content-length")
+                    .and_then(|(_, v)| v.parse::<usize>().ok())
+                    .unwrap_or(0);
+                let body = Self::read_body(&mut c.stream, body_start, content_length).await?;
+                (headers, body)
+            },
+            Connection::Tls(c) => {
                 c.stream.write_all(request.as_bytes()).await?;
                 if let Some(body_bytes) = body.clone() {
                     c.stream.write_all(&body_bytes).await?;

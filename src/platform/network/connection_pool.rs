@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use crate::platform::network::tcp::TcpConnection;
-// use crate::platform::network::tls::TlsConnection;
+use crate::platform::network::tls::TlsConnection;
 
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]
 pub struct HostKey {
@@ -15,7 +15,7 @@ pub struct HostKey {
 #[derive(Debug)]
 pub enum Connection {
     Tcp(TcpConnection),
-    //    Tls(TlsConnection),
+    Tls(TlsConnection),
 }
 
 #[derive(Debug)]
