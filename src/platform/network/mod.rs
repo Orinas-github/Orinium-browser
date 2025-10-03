@@ -1,7 +1,7 @@
 pub mod config;
 pub mod connection_pool;
 pub mod tcp;
-// pub mod tls;
+pub mod tls;
 pub mod cache;
 pub mod cookie_store;
 pub mod network_core;
@@ -13,7 +13,7 @@ pub use config::NetworkConfig;
 pub use connection_pool::{Connection, ConnectionPool, HostKey};
 #[allow(unused_imports)]
 pub use tcp::TcpConnection;
-// pub use tls::TlsConnection;
+pub use tls::TlsConnection;
 #[allow(unused_imports)]
 pub use cache::Cache;
 #[allow(unused_imports)]
