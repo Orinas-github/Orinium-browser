@@ -20,7 +20,9 @@ pub struct CookieStore {
 
 impl CookieStore {
     pub fn new() -> Self {
-        Self { store: Arc::new(RwLock::new(HashMap::new())) }
+        Self {
+            store: Arc::new(RwLock::new(HashMap::new())),
+        }
     }
 
     pub async fn set_cookies(&self, url: &Url, cookie_headers: &[String]) {
@@ -45,11 +47,14 @@ impl CookieStore {
         let store = self.store.read().await;
         let domain = url.host_str().unwrap_or_default();
         if let Some(cookies) = store.get(domain) {
-            let cookie_str = cookies.iter()
+            let cookie_str = cookies
+                .iter()
                 .map(|c| format!("{}={}", c.name, c.value))
                 .collect::<Vec<_>>()
                 .join("; ");
-            if !cookie_str.is_empty() { return Some(cookie_str); }
+            if !cookie_str.is_empty() {
+                return Some(cookie_str);
+            }
         }
         None
     }

@@ -57,11 +57,12 @@ pub struct ProxySettings {
     pub proxies: Vec<ProxyConfig>, // 複数種類を保持できる
 }
 
-
 impl Default for NetworkConfig {
     fn default() -> Self {
         Self {
-            user_agent: String::from("OrinionBrowser/0.1 (+https://github.com/Orinas-github/Orinium-browser)"),
+            user_agent: String::from(
+                "OrinionBrowser/0.1 (+https://github.com/Orinas-github/Orinium-browser)",
+            ),
             connect_timeout: Duration::from_secs(10),
             read_timeout: Duration::from_secs(30),
             enable_cache: true,

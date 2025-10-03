@@ -15,7 +15,7 @@ pub struct HostKey {
 #[derive(Debug)]
 pub enum Connection {
     Tcp(TcpConnection),
-//    Tls(TlsConnection),
+    //    Tls(TlsConnection),
 }
 
 #[derive(Debug)]

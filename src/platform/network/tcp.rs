@@ -1,6 +1,6 @@
-use tokio::net::TcpStream;
-use tokio::io::{AsyncRead, AsyncWrite};
 use std::time::Duration;
+use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::net::TcpStream;
 
 #[derive(Debug)]
 pub struct TcpConnection {
@@ -10,7 +10,7 @@ pub struct TcpConnection {
 impl TcpConnection {
     /// TCP接続を作成、指定したタイムアウト時間内に接続できなければエラーを返す
     pub async fn connect(host: &str, port: u16, timeout: Duration) -> anyhow::Result<Self> {
-        let addr = format!("{}:{}", host, port);
+        let addr = format!("{host}:{port}");
         let stream = tokio::time::timeout(timeout, TcpStream::connect(addr)).await??;
         Ok(Self { stream })
     }
@@ -49,4 +49,3 @@ impl AsyncWrite for TcpConnection {
         std::pin::Pin::new(&mut self.get_mut().stream).poll_shutdown(cx)
     }
 }
-
