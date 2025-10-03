@@ -1,5 +1,5 @@
 use anyhow::Result;
-use orinium_browser::engine::html::parser;
+use orinium_browser::parser;
 
 #[tokio::main]
 async fn main() -> Result<()> {
