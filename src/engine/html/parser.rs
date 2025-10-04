@@ -50,7 +50,8 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> NodeRef {
         while let Some(token) = self.tokenizer.next_token() {
-            //log::info!("Processing token: {token:?}");
+            //println!("---");
+            //println!("Processing token: {token:?}");
             match token {
                 Token::StartTag { .. } => self.handle_start_tag(token),
                 Token::EndTag { .. } => self.handle_end_tag(token),
@@ -58,7 +59,7 @@ impl<'a> Parser<'a> {
                 Token::Comment(_) => self.handle_comment(token),
                 Token::Text(_) => self.handle_text(token),
             }
-            //print_dom_tree(&self.stack.last().unwrap(), "", true);
+            //print_dom_tree(&self.stack.last().unwrap(), &[]);
         }
 
         Rc::clone(&self.stack[0])
@@ -114,6 +115,8 @@ impl<'a> Parser<'a> {
                     {
                         return;
                     }
+                } else if data.trim().is_empty() {
+                    return;
                 }
             } else if data.trim().is_empty() {
                 return;
