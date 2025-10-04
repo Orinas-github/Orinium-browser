@@ -19,6 +19,12 @@ pub struct Cache {
 }
 
 #[allow(dead_code)]
+impl Default for Cache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Cache {
     pub fn new() -> Self {
         Self {

@@ -34,37 +34,7 @@ pub struct Parser<'a> {
     stack: Vec<NodeRef>,
 }
 
-#[allow(dead_code)]
 impl<'a> Parser<'a> {
-    fn print_stack(&self) {
-        println!("--- stack ---");
-        for (i, node_ref) in self.stack.iter().enumerate() {
-            let name = match &node_ref.borrow().node_type {
-                NodeType::Document => "Document".to_string(),
-                NodeType::Element { tag_name, .. } => format!("Element({tag_name})"),
-                NodeType::Text(_) => "Text".to_string(),
-                NodeType::Comment(_) => "Comment".to_string(),
-                NodeType::Doctype { name, .. } => format!("Doctype({name:?})"),
-            };
-            println!("stack[{i}]: {name}");
-        }
-        println!("-------------");
-    }
-
-    fn print_dom_root(&self) {
-        let root = &self.stack[0];
-        println!(
-            "DOM root: {:?}",
-            match &root.borrow().node_type {
-                NodeType::Document => "Document",
-                NodeType::Element { tag_name, .. } => tag_name.as_str(),
-                NodeType::Text(_) => "Text",
-                NodeType::Comment(_) => "Comment",
-                NodeType::Doctype { .. } => "Doctype",
-            }
-        );
-    }
-
     pub fn new(input: &'a str) -> Self {
         let document = Rc::new(RefCell::new(Node {
             node_type: NodeType::Document,
@@ -80,7 +50,8 @@ impl<'a> Parser<'a> {
 
     pub fn parse(&mut self) -> NodeRef {
         while let Some(token) = self.tokenizer.next_token() {
-            //log::info!("Processing token: {token:?}");
+            //println!("---");
+            //println!("Processing token: {token:?}");
             match token {
                 Token::StartTag { .. } => self.handle_start_tag(token),
                 Token::EndTag { .. } => self.handle_end_tag(token),
@@ -88,9 +59,7 @@ impl<'a> Parser<'a> {
                 Token::Comment(_) => self.handle_comment(token),
                 Token::Text(_) => self.handle_text(token),
             }
-            //print_dom_tree(&self.stack.last().unwrap(), "", true);
-            //self.print_stack();
-            //self.print_dom_root();
+            //print_dom_tree(&self.stack.last().unwrap(), &[]);
         }
 
         Rc::clone(&self.stack[0])
@@ -146,6 +115,8 @@ impl<'a> Parser<'a> {
                     {
                         return;
                     }
+                } else if data.trim().is_empty() {
+                    return;
                 }
             } else if data.trim().is_empty() {
                 return;

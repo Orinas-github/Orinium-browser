@@ -130,7 +130,14 @@ impl NetworkCore {
             None => {
                 let cfg = self.config.read().await;
                 if url.scheme() == "https" {
-                    Connection::Tls(crate::platform::network::tls::TlsConnection::connect(&host, port, cfg.connect_timeout).await?)
+                    Connection::Tls(
+                        crate::platform::network::tls::TlsConnection::connect(
+                            &host,
+                            port,
+                            cfg.connect_timeout,
+                        )
+                        .await?,
+                    )
                 } else {
                     Connection::Tcp(TcpConnection::connect(&host, port, cfg.connect_timeout).await?)
                 }
@@ -177,7 +184,7 @@ impl NetworkCore {
                     .unwrap_or(0);
                 let body = Self::read_body(&mut c.stream, body_start, content_length).await?;
                 (headers, body)
-            },
+            }
             Connection::Tls(c) => {
                 c.stream.write_all(request.as_bytes()).await?;
                 if let Some(body_bytes) = body.clone() {

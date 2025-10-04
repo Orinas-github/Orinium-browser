@@ -1,10 +1,7 @@
-use anyhow::Result;
-use orinium_browser::parser;
+use orinium_browser::engine::html::parser;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    env_logger::init();
-
+#[test]
+fn test_dom_parse() {
     let html = r#"<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -26,10 +23,7 @@ async fn main() -> Result<()> {
 "#;
 
     html.to_string();
-
-    log::debug!("Parsing HTML: {html}\n");
     let mut parser = parser::Parser::new(&html);
-    let dom = parser.parse();
-    parser::print_dom_tree(&dom, &[]);
-    Ok(())
+    let _dom = parser.parse();
+    //parser::print_dom_tree(&dom, &[]);
 }

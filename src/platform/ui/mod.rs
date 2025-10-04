@@ -32,6 +32,12 @@ impl State {
 }
 
 #[allow(dead_code)]
+impl Default for App {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl App {
     pub fn new() -> Self {
         Self { state: None }

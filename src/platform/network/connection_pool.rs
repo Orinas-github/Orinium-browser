@@ -12,6 +12,7 @@ pub struct HostKey {
     pub port: u16,
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
 pub enum Connection {
     Tcp(TcpConnection),
@@ -22,6 +23,12 @@ pub enum Connection {
 pub struct ConnectionPool {
     pool: Arc<RwLock<HashMap<HostKey, Vec<Connection>>>>,
     pub max_connections_per_host: usize,
+}
+
+impl Default for ConnectionPool {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ConnectionPool {

@@ -9,5 +9,5 @@ pub mod engine;
 pub mod platform;
 
 pub use engine::html;
-pub use platform::network;
 pub use engine::html::parser;
+pub use platform::network;
