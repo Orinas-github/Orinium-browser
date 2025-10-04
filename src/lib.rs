@@ -8,6 +8,11 @@ pub mod engine;
 /// ファイルI/Oなどプラットフォーム固有の実装が含まれます。
 pub mod platform;
 
+/// ブラウザのUI関連モジュール
+/// このモジュールには、UIレンダリングやウィンドウ管理など
+/// ブラウザのユーザーインターフェース関連の機能が含まれます。
+pub mod browser;
+
 pub use engine::html;
 pub use engine::html::parser;
 pub use platform::network;
