@@ -25,6 +25,12 @@ pub struct ConnectionPool {
     pub max_connections_per_host: usize,
 }
 
+impl Default for ConnectionPool {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ConnectionPool {
     pub fn new() -> Self {
         Self {

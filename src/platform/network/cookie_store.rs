@@ -18,6 +18,12 @@ pub struct CookieStore {
     store: Arc<RwLock<HashMap<String, Vec<Cookie>>>>, // domain -> cookies
 }
 
+impl Default for CookieStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CookieStore {
     pub fn new() -> Self {
         Self {
