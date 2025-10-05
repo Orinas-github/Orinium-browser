@@ -1,6 +1,8 @@
 # Orinium Browser
 **🚧 _このプロジェクトは開発段階にあり、まだブラウザとして動作するわけではありません。_**
 
+[English version → README.en.md](./README.en.md)
+
 ## Googleに依存しない、独立したブラウザ
 このブラウザエンジンのソースコードは、**Googleに依存しません**。Firefoxなどの一部のブラウザを除いて、世の中の多くのブラウザはGoogleのChromiumに依存しています。
 このプロジェクトはChromiumに代る新しいブラウザエンジンを提供します。
