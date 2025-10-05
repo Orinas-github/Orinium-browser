@@ -208,7 +208,9 @@ impl<'a> Parser<'a> {
                 return true;
             }
         } else if let NodeType::Document = &parent.borrow().node_type {
-            todo!("Document の中に DOCTYPE宣言 以外のが来た場合の処理");
+            if !(name == "html") {
+                todo!("Document の中に DOCTYPE宣言 以外のが来た場合の処理");
+            }
         }
         false
     }
