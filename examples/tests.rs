@@ -18,6 +18,8 @@ async fn main() {
                 println!("Test names:");
                 println!("create_window - Create a window and display it.");
                 println!("parse_dom [URL] - Test DOM parsing functionality.");
+                println!("fetch_url [URL] - Test network fetching functionality.");
+                println!("help - Show this help message.");
             }
             "create_window" => {
                 let _ = run();
@@ -35,6 +37,30 @@ async fn main() {
                     parser::print_dom_tree(&dom, &[]);
                 } else {
                     eprintln!("Please provide a URL for DOM parsing test.");
+                }
+            }
+            "fetch_url" => {
+                if args.len() == 3 {
+                    let url = &args[2];
+                    println!("Fetching URL: {}", url);
+                    let net = NetworkCore::new().unwrap();
+                    match net.fetch(url).await {
+                        Ok(resp) => {
+                            println!("Response Reason_phrase: {}", resp.reason_phrase);
+                            println!("Response Headers:");
+                            for (key, value) in &resp.headers {
+                                println!("{}: {}", key, value);
+                            }
+                            println!("Response Body (first 100 chars):");
+                            let body_str = String::from_utf8_lossy(&resp.body);
+                            println!("{}", &body_str[..100.min(body_str.len())]);
+                        }
+                        Err(e) => {
+                            eprintln!("Failed to fetch URL: {}", e);
+                        }
+                    }
+                } else {
+                    eprintln!("Please provide a URL for fetching test.");
                 }
             }
             _ => {
