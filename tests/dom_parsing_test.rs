@@ -24,6 +24,15 @@ fn test_dom_parse() {
 
     html.to_string();
     let mut parser = parser::Parser::new(&html);
-    let _dom = parser.parse();
-    //parser::print_dom_tree(&dom, &[]);
+    let dom = parser.parse();
+    parser::print_dom_tree(&dom, &[]);
+}
+
+#[test]
+fn test_dom_parse_malformed() {
+    let html = r#"<html><head><title>Test</title></head><body><p>Paragraph 1<p>Paragraph 2<div>Div content"#;
+
+    let mut parser = parser::Parser::new(&html);
+    let dom = parser.parse();
+    parser::print_dom_tree(&dom, &[]);
 }

@@ -11,6 +11,7 @@ use crate::platform::network::{
     connection_pool::{Connection, ConnectionPool, HostKey},
     cookie_store::CookieStore,
     tcp::TcpConnection,
+    tls::TlsConnection,
 };
 
 /// HTTPレスポンスを表す構造体
@@ -130,14 +131,7 @@ impl NetworkCore {
             None => {
                 let cfg = self.config.read().await;
                 if url.scheme() == "https" {
-                    Connection::Tls(
-                        crate::platform::network::tls::TlsConnection::connect(
-                            &host,
-                            port,
-                            cfg.connect_timeout,
-                        )
-                        .await?,
-                    )
+                    Connection::Tls(TlsConnection::connect(&host, port, cfg.connect_timeout).await?)
                 } else {
                     Connection::Tcp(TcpConnection::connect(&host, port, cfg.connect_timeout).await?)
                 }
