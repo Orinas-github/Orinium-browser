@@ -199,7 +199,7 @@ impl<'a> Parser<'a> {
             if tag_name == "option" && name == "option" {
                 return true;
             }
-            // <p> の中に <div>, <section>, <article>, <header>, <footer>, <nav>, <aside> が来た場合、前の <p> を閉じる
+            // <p> の中にブロック要素が来た場合、前の <p> を閉じる
             if matches!(
                 tag_name.as_str(),
                 "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
