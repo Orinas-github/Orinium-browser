@@ -7,8 +7,8 @@ fn main() {
     if args.len() == 2  {
         match args[1].as_str() {
             "help" => {
-                println!("This is a UI test application for Orinium Browser.");
-                println!("Usage: cargo run --example ui_test [NAME]\n");
+                println!("This is a test application for Orinium Browser development.");
+                println!("Usage: cargo run --example tests [NAME]\n");
                 println!("Test names:");
                 println!("create_window - Create a window and display it.");
             }
