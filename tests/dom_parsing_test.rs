@@ -24,8 +24,8 @@ fn test_dom_parse() {
 
     html.to_string();
     let mut parser = parser::Parser::new(&html);
-    let _dom = parser.parse();
-    //parser::print_dom_tree(&dom, &[]);
+    let dom = parser.parse();
+    parser::print_dom_tree(&dom, &[]);
 }
 
 #[test]
