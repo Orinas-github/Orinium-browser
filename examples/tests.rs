@@ -65,7 +65,7 @@ async fn main() {
             }
             _ => {
                 eprintln!("Unknown argument: {}", args[1]);
-                eprintln!("Use --help or -h for usage information.");
+                eprintln!("Use help for usage information.");
             }
         }
     } else {
