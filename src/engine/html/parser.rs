@@ -200,6 +200,8 @@ impl<'a> Parser<'a> {
                 && matches!(name.as_str(), "div" | "section" | "article" | "header" | "footer" | "nav" | "aside") {
                 return true;
             }
+        } else if let NodeType::Document = &parent.borrow().node_type {
+            todo!("Document の中に DOCTYPE宣言 以外のが来た場合の処理");
         }
     false
     }
