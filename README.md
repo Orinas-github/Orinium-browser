@@ -1,4 +1,5 @@
 # Orinium Browser
+**🚧 _このプロジェクトは開発段階にあり、まだブラウザとして動作するわけではありません。_**
 
 ## Googleに依存しない、独立したブラウザ
 このブラウザエンジンのソースコードは、**Googleに依存しません**。Firefoxなどの一部のブラウザを除いて、世の中の多くのブラウザはGoogleのChromiumに依存しています。
@@ -16,5 +17,6 @@
 
 ## 貢献
 [CONTRIBUTING.md](./CONTRIBUTING.md)を参照してください。
+
 TODOは[tasks.md](./tasks.md)にあります。
 
