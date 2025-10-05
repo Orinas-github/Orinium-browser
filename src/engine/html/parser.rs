@@ -72,10 +72,15 @@ impl<'a> Parser<'a> {
             self_closing,
         } = token
         {
-            let parent = Rc::clone(self.stack.last().unwrap());
+            let mut parent = Rc::clone(self.stack.last().unwrap());
             if self.check_start_tag_with_invalid_nesting(&name, &parent) {
-                todo!("Found invalid nesting for <{name}>. Auto-closing the previous tag.");
-                //self.handle_end_tag();
+                if let NodeType::Element { tag_name, .. } = &parent.borrow().node_type {
+                    //println!("Auto-closing tag: <{}> to allow <{}> inside it.", tag_name, name);
+                    //print_dom_tree(&Rc::clone(&self.stack[0]), &[]);
+                    self.handle_end_tag(Token::EndTag { name: tag_name.clone() });
+                    //print_dom_tree(&Rc::clone(&self.stack[0]), &[]);
+                }
+                parent = Rc::clone(self.stack.last().unwrap());
             }
             let new_node = Rc::new(RefCell::new(Node {
                 node_type: NodeType::Element {
@@ -188,6 +193,11 @@ impl<'a> Parser<'a> {
             }
             // <option> の中に <option> が来た場合、前の <option> を閉じる
             if tag_name == "option" && name == "option" {
+                return true;
+            }
+            // <p> の中に <div>, <section>, <article>, <header>, <footer>, <nav>, <aside> が来た場合、前の <p> を閉じる
+            if tag_name == "p"
+                && matches!(name.as_str(), "div" | "section" | "article" | "header" | "footer" | "nav" | "aside") {
                 return true;
             }
         }
