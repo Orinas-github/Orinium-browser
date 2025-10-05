@@ -73,6 +73,10 @@ impl<'a> Parser<'a> {
         } = token
         {
             let parent = Rc::clone(self.stack.last().unwrap());
+            if self.check_start_tag_with_invalid_nesting(&name, &parent) {
+                todo!("Found invalid nesting for <{name}>. Auto-closing the previous tag.");
+                //self.handle_end_tag();
+            }
             let new_node = Rc::new(RefCell::new(Node {
                 node_type: NodeType::Element {
                     tag_name: name,
@@ -162,6 +166,32 @@ impl<'a> Parser<'a> {
             }));
             parent.borrow_mut().children.push(doctype_node);
         }
+    }
+
+    fn check_start_tag_with_invalid_nesting(&self, name: &String, parent: &NodeRef) -> bool {
+        if let NodeType::Element { tag_name, .. } = &parent.borrow().node_type {
+            // <p> の中に <p> が来た場合、前の <p> を閉じる
+            if tag_name == "p" && name == "p" {
+                return true;
+            }
+            // <li> の中に <li> が来た場合、前の <li> を閉じる
+            if tag_name == "li" && name == "li" {
+                return true;
+            }
+            // <dt> の中に <dt> または <dd> が来た場合、前の <dt> を閉じる
+            if tag_name == "dt" && (name == "dt" || name == "dd") {
+                return true;
+            }
+            // <dd> の中に <dt> または <dd> が来た場合、前の <dd> を閉じる
+            if tag_name == "dd" && (name == "dt" || name == "dd") {
+                return true;
+            }
+            // <option> の中に <option> が来た場合、前の <option> を閉じる
+            if tag_name == "option" && name == "option" {
+                return true;
+            }
+        }
+    false
     }
 }
 
