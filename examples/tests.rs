@@ -36,7 +36,7 @@ async fn main() {
                     println!("Fetched HTML (first 50 chars):\n{}", html.chars().take(50).collect::<String>());
                     let mut parser = parser::Parser::new(&html);
                     let dom = parser.parse();
-                    parser::print_dom_tree(&dom, &[]);
+                    println!("DOM Tree:\n{}", dom.borrow());
                 } else {
                     eprintln!("Please provide a URL for DOM parsing test.");
                 }
