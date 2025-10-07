@@ -59,7 +59,6 @@ impl<'a> Parser<'a> {
                 Token::Comment(_) => self.handle_comment(token),
                 Token::Text(_) => self.handle_text(token),
             }
-            //print_dom_tree(&self.stack.last().unwrap(), &[]);
         }
 
         Rc::clone(&self.stack[0])
@@ -76,9 +75,7 @@ impl<'a> Parser<'a> {
             if self.check_start_tag_with_invalid_nesting(&name, &parent) {
                 if let NodeType::Element { tag_name, .. } = &parent.borrow().node_type {
                     //println!("Auto-closing tag: <{}> to allow <{}> inside it.", tag_name, name);
-                    //print_dom_tree(&Rc::clone(&self.stack[0]), &[]);
                     self.handle_end_tag(Token::EndTag {name: tag_name.clone()});
-                    //print_dom_tree(&Rc::clone(&self.stack[0]), &[]);
                 }
                 parent = Rc::clone(self.stack.last().unwrap());
             }
@@ -244,70 +241,83 @@ impl<'a> Parser<'a> {
     }
 }
 
-/// 再帰表示用の DOM デバッグ関数（祖先情報付きで罫線を正確に描画）
-pub fn print_dom_tree(node: &NodeRef, ancestors_last: &[bool]) {
-    let n = node.borrow();
+impl Node {
+    fn fmt_dom_tree(&self, f: &mut std::fmt::Formatter, ancestors_last: &[bool]) -> std::fmt::Result {
+        let n = self;
 
-    // ├── か └── を決める（自身の最後かどうかは ancestors_last の最後で判断）
-    let is_last = *ancestors_last.last().unwrap_or(&true);
-    let connector = if ancestors_last.is_empty() {
-        ""
-    } else if is_last {
-        "└── "
-    } else {
-        "├── "
-    };
+        // ├── か └── を決める（自身の最後かどうかは ancestors_last の最後で判断）
+        let is_last = *ancestors_last.last().unwrap_or(&true);
+        let connector = if ancestors_last.is_empty() {
+            ""
+        } else if is_last {
+            "└── "
+        } else {
+            "├── "
+        };
 
-    // 現在の prefix を構築
-    let mut prefix = String::new();
-    for &ancestor_last in &ancestors_last[..ancestors_last.len().saturating_sub(1)] {
-        prefix.push_str(if ancestor_last { "    " } else { "│   " });
-    }
-
-    // ノード情報の表示
-    match &n.node_type {
-        NodeType::Document => println!("{prefix}{connector}Document"),
-        NodeType::Element {
-            tag_name,
-            attributes,
-        } => {
-            let attrs_str = if attributes.is_empty() {
-                "".to_string()
-            } else {
-                let attrs_list = attributes
-                    .iter()
-                    .map(|attr| format!("{}=\"{}\"", attr.name, attr.value))
-                    .collect::<Vec<_>>()
-                    .join(" ");
-                format!(" [{attrs_list}]")
-            };
-            println!("{prefix}{connector}Element: {tag_name}{attrs_str}");
+        // 現在の prefix を構築
+        let mut prefix = String::new();
+        for &ancestor_last in &ancestors_last[..ancestors_last.len().saturating_sub(1)] {
+            prefix.push_str(if ancestor_last { "    " } else { "│   " });
         }
-        NodeType::Text(data) => {
-            let trimmed = data.trim();
-            if !trimmed.is_empty() {
-                println!("{prefix}{connector}Text: {trimmed:?}");
+
+        // ノード情報の表示
+        match &n.node_type {
+            NodeType::Document => {
+                writeln!(f, "{prefix}{connector}Document")?;
+            },
+            NodeType::Element {
+                tag_name,
+                attributes,
+            } => {
+                let attrs_str = if attributes.is_empty() {
+                    "".to_string()
+                } else {
+                    let attrs_list = attributes
+                        .iter()
+                        .map(|attr| format!("{}=\"{}\"", attr.name, attr.value))
+                        .collect::<Vec<_>>()
+                        .join(" ");
+                    format!(" [{attrs_list}]")
+                };
+                writeln!(f, "{prefix}{connector}Element: {tag_name}{attrs_str}")?;
+            }
+            NodeType::Text(data) => {
+                let trimmed = data.trim();
+                if !trimmed.is_empty() {
+                    writeln!(f, "{prefix}{connector}Text: {trimmed:?}")?;
+                }
+            }
+            NodeType::Comment(data) => {
+                writeln!(f, "{prefix}{connector}Comment: {data:?}")?;
+            },
+            NodeType::Doctype {
+                name,
+                public_id,
+                system_id,
+            } => {
+                writeln!(f, "{prefix}{connector}Doctype: name={name:?}, public_id={public_id:?}, system_id={system_id:?}")?;
             }
         }
-        NodeType::Comment(data) => println!("{prefix}{connector}Comment: {data:?}"),
-        NodeType::Doctype {
-            name,
-            public_id,
-            system_id,
-        } => {
-            println!("{prefix}{connector}Doctype: name={name:?}, public_id={public_id:?}, system_id={system_id:?}");
+
+        // 子ノードを再帰
+        let child_count = n.children.len();
+        for (i, child) in n.children.iter().enumerate() {
+            let child_is_last = i == child_count - 1;
+
+            // ancestors_last を更新して渡す
+            let mut new_ancestors = ancestors_last.to_vec();
+            new_ancestors.push(child_is_last);
+
+            child.borrow().fmt_dom_tree(f, &new_ancestors)?;
         }
+        Ok(())
     }
+}
 
-    // 子ノードを再帰
-    let child_count = n.children.len();
-    for (i, child) in n.children.iter().enumerate() {
-        let child_is_last = i == child_count - 1;
-
-        // ancestors_last を更新して渡す
-        let mut new_ancestors = ancestors_last.to_vec();
-        new_ancestors.push(child_is_last);
-
-        print_dom_tree(child, &new_ancestors);
+impl std::fmt::Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.fmt_dom_tree(f, &[])?;
+        Ok(())
     }
 }
