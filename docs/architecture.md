@@ -36,3 +36,33 @@ Window Frame
 | **engine::html / css** | `src/engine/html`・`src/engine/css` | トークナイズ、パース、DOM/CSSOM構築。                 |
 | **platform::network**  | `src/platform/network`             | TCP/TLS通信、HTTP処理、キャッシュ、Cookie管理。        |
 | **platform::io**       | `src/platform/io`                  | OS依存の入出力抽象。ファイル・設定管理など。                 |
+
+## 依存方向と逆転依存
+* モジュールの依存は **上位 → 下位** の一方向のみ
+* 下位層は上位層を参照しない
+* 逆転依存は循環依存を生むため避ける
+
+### 依存方向図
+
+```
+┌───────────────┐
+│    browser    │
+└───────┬───────┘
+         ▼
+┌───────────────┐
+│ engine        │
+│ renderer/html │
+└───────┬───────┘
+        ▼
+┌───────────────┐
+│ platform      │
+│ renderer/ui   │
+└───────────────┘
+
+```
+* 矢印は依存方向を示す
+* 上位層が下位層を呼ぶ一方向のみ
+<!--
+---
+* イベントは上位層から下位層へ伝播し、下位層に上位を参照させず、必要な場合は Callback / Channel を利用しましょう
+-->
