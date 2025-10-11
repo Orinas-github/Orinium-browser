@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use crate::platform::renderer::gpu::GpuRenderer;
+
 #[allow(unused_imports)]
 use winit::{
     application::ApplicationHandler,
@@ -11,6 +13,7 @@ use winit::{
 
 pub struct State {
     window: Arc<Window>,
+    gpu_renderer: GpuRenderer,
 }
 
 pub struct App {
@@ -19,15 +22,23 @@ pub struct App {
 
 impl State {
     pub async fn new(window: Arc<Window>) -> anyhow::Result<Self> {
-        Ok(Self { window })
+        let gpu_renderer = GpuRenderer::new(window.clone()).await?;
+        Ok(Self { window, gpu_renderer })
     }
 
-    pub fn resize(&mut self, _width: u32, _height: u32) {
-        // これから実装
+    pub fn resize(&mut self, width: u32, height: u32) {
+        self.gpu_renderer
+            .resize(winit::dpi::PhysicalSize::new(width, height));
     }
 
-    pub fn render(&mut self) {
+    pub fn render(&mut self) -> anyhow::Result<()> {
+        self.gpu_renderer.render()?;
         self.window.request_redraw();
+        Ok(())
+    }
+
+    pub fn get_gpu_renderer(&mut self) -> &mut GpuRenderer {
+        &mut self.gpu_renderer
     }
 }
 
@@ -74,7 +85,7 @@ impl ApplicationHandler<State> for App {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(size) => state.resize(size.width, size.height),
             WindowEvent::RedrawRequested => {
-                state.render();
+                state.render().ok();
             }
             WindowEvent::KeyboardInput {
                 event:
