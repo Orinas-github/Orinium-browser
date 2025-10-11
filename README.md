@@ -1,5 +1,6 @@
 # Orinium Browser
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Orinas-github/Orinium-browser)
+
 **🚧 _このプロジェクトは開発段階にあり、まだブラウザとして動作するわけではありません。_**
 
 [English version → README.en.md](./README.en.md)
