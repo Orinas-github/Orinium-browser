@@ -2,7 +2,7 @@
 
 ## 実装
 - [ ] Parser の DOCTYPE宣言 補完機能
-- [ ] Render pipeline の実装
+- [x] Render pipeline の実装
 - [x] TLS通信
 
 ## バグ修正
