@@ -1,4 +1,4 @@
-// engine::renderer - HTML/CSSレイアウト結果から描画命令を生成する論理描画層
+//! engine::renderer - HTML/CSSレイアウト結果から描画命令を生成する論理描画層
 
 use crate::engine::html::parser::{NodeRef, NodeType};
 
