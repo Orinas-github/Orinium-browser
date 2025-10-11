@@ -1,5 +1,3 @@
-# Pull Request Template
-
 ## 概要 / Summary
 <!-- このPRの目的を簡単に説明してください -->
 <!-- 例: DOMパーサに新しいタグ処理を追加 -->

@@ -241,6 +241,13 @@ impl<'a> Parser<'a> {
     }
 }
 
+impl std::fmt::Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.fmt_dom_tree(f, &[])?;
+        Ok(())
+    }
+}
+
 impl Node {
     fn fmt_dom_tree(&self, f: &mut std::fmt::Formatter, ancestors_last: &[bool]) -> std::fmt::Result {
         let n = self;
@@ -311,13 +318,6 @@ impl Node {
 
             child.borrow().fmt_dom_tree(f, &new_ancestors)?;
         }
-        Ok(())
-    }
-}
-
-impl std::fmt::Display for Node {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.fmt_dom_tree(f, &[])?;
         Ok(())
     }
 }
